@@ -1,0 +1,970 @@
+/* Mail look for Thunderbird 159 (mbp115 kit, tools/mail, MIT): grey sidebar, a plain message list with blue unread
+ * dots and rounded selections, a quiet message header. Light and dark follow the system style.
+ * Thunderbird's own layout settings (vertical view, two-line cards, icon toolbar, big avatar) come from prefs.js and
+ * xulstore.json next to this file. Only colours, sizes and spacing live here: no images.
+ * userChrome.css is a user sheet: Thunderbird's own rules win over it unless a declaration is !important. */
+
+:root {
+  --mail-accent: AccentColor;
+  --mail-accent-text: AccentColorText;
+  --mail-text: light-dark(#1d1d1f, #f5f5f7);
+  --mail-text-2: light-dark(#86868b, #98989d);
+  --mail-bg: light-dark(#ffffff, #1e1e1e);
+  --mail-sidebar: light-dark(#f2f2f4, #262628);
+  --mail-line: light-dark(rgba(0, 0, 0, .09), rgba(255, 255, 255, .09));
+  --mail-hover: light-dark(rgba(0, 0, 0, .05), rgba(255, 255, 255, .06));
+  --mail-selected: light-dark(rgba(0, 0, 0, .09), rgba(255, 255, 255, .11));
+  --mail-flag: light-dark(#ff3b30, #ff453a);
+  --mail-radius: 7px;
+}
+
+/* --- main window: toolbar in the list's colour, a small search field at the end. With the kit's add-on (Mail
+ * Quick Actions) it knows where the sidebar ends and the message starts: the sidebar's grey reaches the top under the
+ * window buttons and the action buttons sit over the message, as in Mail. */
+#unifiedToolbar {
+  background: transparent !important;   /* the container below spans the whole width: its gradient lines up */
+  border-block-end-color: transparent !important;
+}
+#unifiedToolbarContainer {
+  --mail-side: 0px;   /* the sidebar's grey up to the top only in mail tabs */
+  :root[mbp115QuickActions-mail] & {
+    --mail-side: var(--mbp115QuickActions-sidebar-end, 0px);
+  }
+  background: linear-gradient(to right, var(--mail-sidebar) calc(var(--mail-side) - 1px),
+    var(--mail-line) calc(var(--mail-side) - 1px), var(--mail-line) var(--mail-side),
+    var(--mail-bg) var(--mail-side)) !important;
+  border-block-end-color: transparent !important;
+}
+#unifiedToolbar .unified-toolbar-button {
+  color: var(--mail-text-2) !important;
+  border-radius: 6px !important;
+}
+#unifiedToolbar .unified-toolbar-button:hover {
+  background-color: var(--mail-hover) !important;
+}
+/* toolbar icons: the kit's own line icons in Mail's places (Apple's SF Symbols may not be used outside Apple's
+ * platforms), in Mail 26's order and capsules (see below). A 16 px glyph in a 24 px box like GNOME's symbolic icons;
+ * black or white like Mail's, the flag red. */
+#unifiedToolbarContent .get-messages .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 6.5A1.5 1.5 0 0 1 5 5h10a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 15 15H5a1.5 1.5 0 0 1-1.5-1.5z'/><path d='M4 6l6 4.75L16 6'/></svg>") !important; }
+#unifiedToolbarContent .write-message .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M9.5 4H5.5A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16h9a1.5 1.5 0 0 0 1.5-1.5V10.5'/><path d='M14.6 3.4a1.4 1.4 0 0 1 2 2L10.2 11.8 7.8 12.4 8.4 10z'/></svg>") !important; }
+#unifiedToolbarContent .archive .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 4.5h13v3h-13z'/><path d='M4.75 7.5v7A1.5 1.5 0 0 0 6.25 16h7.5a1.5 1.5 0 0 0 1.5-1.5v-7'/><path d='M8.25 10.25h3.5'/></svg>") !important; }
+#unifiedToolbarContent .delete .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M8 5.5V4.25h4V5.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8.25 8.5v5'/><path d='M11.75 8.5v5'/></svg>") !important; }
+#unifiedToolbarContent .junk .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8 8.75l4 4'/><path d='M12 8.75l-4 4'/></svg>") !important; }
+#unifiedToolbarContent .reply .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 5 3.75 9.25 8 13.5'/><path d='M4 9.25h7.25a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+#unifiedToolbarContent .reply-all .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M7.25 5 3 9.25l4.25 4.25'/><path d='M10.75 5 6.5 9.25l4.25 4.25'/><path d='M6.75 9.25h5.5a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+#unifiedToolbarContent .forward-inline .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5l4.25 4.25L12 13.5'/><path d='M16 9.25H8.75A4.75 4.75 0 0 0 4 14v1'/></svg>") !important; }
+#unifiedToolbarContent .mark-as .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 17V3.75'/><path d='M5 4.25h9.5l-2.25 3.5 2.25 3.5H5z'/></svg>") !important; }
+#unifiedToolbarContent .move-to .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 6.5A1.5 1.5 0 0 1 5 5h3l1.5 1.5H15a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 15 15.5H5a1.5 1.5 0 0 1-1.5-1.5z'/><path d='M8 11h4.5'/><path d='M11 9.25l1.75 1.75L11 12.75'/></svg>") !important; }
+@media (prefers-color-scheme: dark) {
+  #unifiedToolbarContent .get-messages .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 6.5A1.5 1.5 0 0 1 5 5h10a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 15 15H5a1.5 1.5 0 0 1-1.5-1.5z'/><path d='M4 6l6 4.75L16 6'/></svg>") !important; }
+  #unifiedToolbarContent .write-message .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M9.5 4H5.5A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16h9a1.5 1.5 0 0 0 1.5-1.5V10.5'/><path d='M14.6 3.4a1.4 1.4 0 0 1 2 2L10.2 11.8 7.8 12.4 8.4 10z'/></svg>") !important; }
+  #unifiedToolbarContent .archive .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 4.5h13v3h-13z'/><path d='M4.75 7.5v7A1.5 1.5 0 0 0 6.25 16h7.5a1.5 1.5 0 0 0 1.5-1.5v-7'/><path d='M8.25 10.25h3.5'/></svg>") !important; }
+  #unifiedToolbarContent .delete .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M8 5.5V4.25h4V5.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8.25 8.5v5'/><path d='M11.75 8.5v5'/></svg>") !important; }
+  #unifiedToolbarContent .junk .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8 8.75l4 4'/><path d='M12 8.75l-4 4'/></svg>") !important; }
+  #unifiedToolbarContent .reply .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 5 3.75 9.25 8 13.5'/><path d='M4 9.25h7.25a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+  #unifiedToolbarContent .reply-all .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M7.25 5 3 9.25l4.25 4.25'/><path d='M10.75 5 6.5 9.25l4.25 4.25'/><path d='M6.75 9.25h5.5a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+  #unifiedToolbarContent .forward-inline .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5l4.25 4.25L12 13.5'/><path d='M16 9.25H8.75A4.75 4.75 0 0 0 4 14v1'/></svg>") !important; }
+  #unifiedToolbarContent .mark-as .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 17V3.75'/><path d='M5 4.25h9.5l-2.25 3.5 2.25 3.5H5z'/></svg>") !important; }
+  #unifiedToolbarContent .move-to .button-icon { content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 6.5A1.5 1.5 0 0 1 5 5h3l1.5 1.5H15a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 15 15.5H5a1.5 1.5 0 0 1-1.5-1.5z'/><path d='M8 11h4.5'/><path d='M11 9.25l1.75 1.75L11 12.75'/></svg>") !important; }
+}
+#unifiedToolbarContent .button-icon {
+  inline-size: 28px !important;
+  block-size: 28px !important;
+}
+/* the flag turns red while the message on screen is flagged (the add-on marks the window), as Mail's does */
+:root[mbp115QuickActions-flagged] #unifiedToolbarContent .mark-as .button-icon {
+  content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23ff3b30' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 17V3.75'/><path d='M5 4.25h9.5l-2.25 3.5 2.25 3.5H5z' fill='%23ff3b30'/></svg>") !important;
+}
+/* no line under the toolbar (the unified-toolbar element's own border) */
+unified-toolbar {
+  border-block-end: none !important;
+}
+
+/* Mail 26 groups its buttons in capsules: New | Reply, Reply All, Forward | Archive, Delete, Junk | Move | Flag */
+#unifiedToolbarContent {
+  min-block-size: 54px !important;
+  --mail-capsule: light-dark(#ffffff, #3a3a3c);
+  --mail-capsule-line: light-dark(rgba(0, 0, 0, .1), rgba(255, 255, 255, .12));
+}
+#unifiedToolbarContent > li:is(.write-message, .reply, .reply-all, .forward-inline, .archive, .delete, .junk, .move-to,
+    .mark-as) {
+  background: var(--mail-capsule) !important;
+  border-block: 1px solid var(--mail-capsule-line) !important;
+  padding: 2px 3px !important;
+  margin-inline: 0 !important;
+}
+#unifiedToolbarContent > li:is(.write-message, .reply, .archive, .move-to, .mark-as) {
+  border-inline-start: 1px solid var(--mail-capsule-line) !important;
+  border-start-start-radius: 19px !important;
+  border-end-start-radius: 19px !important;
+  margin-inline-start: 10px !important;
+  padding-inline-start: 6px !important;
+}
+#unifiedToolbarContent > li:is(.write-message, .forward-inline, .junk, .move-to, .mark-as) {
+  border-inline-end: 1px solid var(--mail-capsule-line) !important;
+  border-start-end-radius: 19px !important;
+  border-end-end-radius: 19px !important;
+  padding-inline-end: 6px !important;
+}
+/* after the capsules' margins: the first button sits over the message pane (the add-on measures it, mail tabs only) */
+:root[mbp115QuickActions-mail] #unifiedToolbarContent > li:nth-child(1 of :not(.spacer, [hidden])) {
+  margin-inline-start: var(--mbp115QuickActions-toolbar-shift, 0px) !important;
+}
+#unifiedToolbarContent .unified-toolbar-button {
+  border-radius: 15px !important;
+  color: var(--mail-text) !important;
+  padding-inline-start: 7px !important;   /* the bigger icons closer together: the search field keeps its width */
+  margin-inline: 0 !important;
+  min-inline-size: 0 !important;
+  &:not([popup]) {
+    padding-inline-end: 7px !important;
+  }
+}
+#unifiedToolbarContent li[item-id="search-bar"] {
+  flex: 0 1 260px !important;
+  max-inline-size: 260px !important;
+  margin-inline-start: 10px !important;
+  --button-border-radius: 19px;
+  --search-padding: 8px;
+  --search-bar-background: var(--mail-capsule);
+  --search-bar-focus-background: var(--mail-capsule);
+  --search-bar-border-color: var(--mail-capsule-line);
+}
+/* "Search…" only, as in Mail: the shortcut ("Ctrl + K", one translated string) is pushed out of the clipped field */
+#unifiedToolbarContent .kbd-container {
+  display: inline-block !important;
+  max-inline-size: 100% !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  vertical-align: top !important;
+}
+#unifiedToolbarContent .kbd-container kbd:first-of-type {
+  visibility: hidden !important;
+  padding-inline-end: 100vw !important;
+}
+#status-bar {
+  background: var(--mail-bg) !important;
+  border-block-start: 1px solid var(--mail-line) !important;
+}
+
+/* --- sidebar (folder pane) */
+#folderPane {
+  background-color: var(--mail-sidebar) !important;
+  border-inline-end: 1px solid var(--mail-line) !important;
+}
+#folderPaneSplitter {
+  border: none !important;
+}
+#folderTree.sidebar-panel-scroll::before,
+#folderTree.sidebar-panel-scroll::after {
+  display: none !important;   /* Thunderbird's scroll shadows: a light strip under the toolbar, Mail has none */
+}
+#folderTree {
+  padding-inline: 10px !important;
+  padding-block-start: 8px !important;
+
+  & li[data-mode] {
+    margin-block-end: 14px !important;
+  }
+  /* section titles */
+  & .mode-container {
+    border: none !important;
+    background: transparent !important;
+    padding-inline: 8px !important;
+  }
+  & .mode-name {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: var(--mail-text-2) !important;
+  }
+
+  & .container {
+    min-block-size: 30px !important;
+    border-radius: var(--mail-radius) !important;
+    color: var(--mail-text) !important;
+    background-color: transparent !important;
+    outline: none !important;
+    padding-inline-end: 8px !important;
+  }
+  & .container:hover {
+    background-color: var(--mail-hover) !important;
+  }
+  /* folder icons in the accent colour, like the tray symbols in Mail */
+  & .icon {
+    fill: transparent !important;
+    stroke: var(--mail-accent) !important;
+  }
+  & li.selected > .container {
+    background-color: var(--mail-selected) !important;
+    color: var(--mail-text) !important;
+  }
+  /* accounts read as section titles, as in Mail's sidebar */
+  & li[data-server-type] > .container {
+    font-weight: 600 !important;
+    color: var(--mail-text-2) !important;
+    font-size: 0.85rem !important;
+  }
+  & li[data-server-type] > .container > .icon,
+  & .account-indicator {
+    display: none !important;
+  }
+  /* unread folders keep their weight; the count says it */
+  & li .container > .name {
+    font-weight: 400 !important;
+  }
+  & li[data-server-type] > .container > .name {
+    font-weight: 600 !important;
+  }
+  & .unread-count,
+  & .total-count {
+    background: transparent !important;
+    border: none !important;
+    color: var(--mail-text-2) !important;
+    font-weight: 400 !important;
+    padding-inline: 0 !important;
+  }
+}
+
+/* --- message list header: name and count, no bar */
+#threadPaneHeaderBar {
+  background: var(--mail-bg) !important;
+  border-block-end: 1px solid var(--mail-line) !important;
+}
+#threadPaneFolderName {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+}
+#threadPaneQuickFilterButton {
+  font-size: 0 !important;
+  min-inline-size: 28px !important;
+}
+/* the count under the name, as in Mail */
+#threadPaneHeaderBar .list-header-bar-container-start {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0 !important;
+}
+#threadPaneHeaderBar .list-header-bar-container-end {
+  background: light-dark(#ffffff, #3a3a3c) !important;
+  border: 1px solid light-dark(rgba(0, 0, 0, .1), rgba(255, 255, 255, .12)) !important;
+  border-radius: 18px !important;
+  padding: 2px 6px !important;
+  margin-inline-end: 4px !important;
+}
+#threadPaneFolderCount {
+  padding-inline-start: 0 !important;
+  color: var(--mail-text-2) !important;
+  font-size: 0.9rem !important;
+}
+
+/* --- message list: rows on one surface, a hairline between them, Mail's selection */
+#threadTree,
+#threadPane {
+  background-color: var(--mail-bg) !important;
+}
+#threadTree[rows="thread-card"] {
+  padding-inline: 6px !important;
+
+  & .card-layout > td {
+    padding: 0 !important;
+  }
+  & .card-layout .card-container {
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: var(--mail-radius) !important;
+    padding-inline: 0 10px !important;
+    color: var(--mail-text) !important;
+  }
+  /* hairline between rows, starting at the text like Mail's */
+  & .card-layout .card-container::after {
+    content: "" !important;
+    position: absolute !important;
+    inset-inline: 22px 10px !important;
+    inset-block-end: 0 !important;
+    border-block-end: 1px solid var(--mail-line) !important;
+  }
+  & .card-layout:is(.selected, :has(+ .selected)) .card-container::after {
+    border-color: transparent !important;
+  }
+  & .card-layout.selected .card-container {
+    background-color: var(--mail-selected) !important;
+  }
+  &:is(:focus, :focus-within) .card-layout.selected .card-container {
+    background-color: var(--mail-accent) !important;
+    color: var(--mail-accent-text) !important;
+
+    & :is(.date, .subject, .sender) {
+      color: var(--mail-accent-text) !important;
+    }
+  }
+
+  /* conversations: the number of messages as a grey pill after the subject, as in Mail */
+  &.cards-row-compact .card-layout .thread-card-dynamic-row {
+    grid-template: "subject button info" max-content / 1fr auto auto !important;
+  }
+  & .card-layout.children button.twisty {
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0 7px !important;
+    min-block-size: 18px !important;
+    background-color: var(--mail-hover) !important;
+    color: var(--mail-text-2) !important;
+    opacity: 1 !important;
+    &::before {
+      display: none !important;
+    }
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    & .replies-icon {
+      display: none !important;
+    }
+    /* Mail's double chevron after the number: down while the conversation is closed, up while it is open */
+    & .twisty-icon {
+      display: inline-block !important;
+      order: 2 !important;
+      inline-size: 12px !important;
+      block-size: 12px !important;
+      transform: none !important;
+      content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='12' height='12' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5.5 4.5 10 8.5l4.5-4M5.5 11 10 15l4.5-4'/></svg>") !important;
+      @media (prefers-color-scheme: dark) {
+        content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='12' height='12' fill='none' stroke='%23aeaeb2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5.5 4.5 10 8.5l4.5-4M5.5 11 10 15l4.5-4'/></svg>") !important;
+      }
+    }
+    & :is(.thread-replies, .mbp115QuickActions-count) {
+      display: inline !important;
+      font-size: .85rem !important;
+      font-weight: 500 !important;
+      color: inherit !important;
+    }
+  }
+  & .card-layout.children:not(.collapsed) button.twisty .twisty-icon {
+    content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='12' height='12' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5.5 9 10 5l4.5 4M5.5 15.5 10 11.5l4.5 4'/></svg>") !important;
+    @media (prefers-color-scheme: dark) {
+      content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='12' height='12' fill='none' stroke='%23aeaeb2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5.5 9 10 5l4.5 4M5.5 15.5 10 11.5l4.5 4'/></svg>") !important;
+    }
+  }
+  /* with the kit's add-on: the number of messages, as in Mail, instead of Thunderbird's "2 replies" */
+  :root[mbp115-quick-actions] & .card-layout.children button.twisty .thread-replies {
+    display: none !important;
+  }
+  /* unread: a dot in the accent colour; the sender is always bold, the subject never */
+  & .card-layout .read-status-column {
+    inline-size: 22px !important;
+    align-items: center !important;
+  }
+  & .card-layout .read-status {
+    display: none !important;
+  }
+  & .card-layout:is([data-properties~="unread"], .collapsed[data-properties~="hasUnread"]) .read-status-column::before {
+    content: "";
+    inline-size: 9px;
+    block-size: 9px;
+    margin-block-start: 7px;
+    border-radius: 50%;
+    background-color: var(--mail-accent);
+  }
+  &:is(:focus, :focus-within) .card-layout.selected .read-status-column::before {
+    background-color: var(--mail-accent-text);
+  }
+  & .card-layout .read-status-column {
+    justify-content: flex-start !important;
+  }
+  /* one account colour bar per row in unified folders: Mail has none */
+  & .card-layout .account-indicator {
+    display: none !important;
+  }
+  & .card-layout .sender {
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+  }
+  & .card-layout .subject {
+    font-weight: 400 !important;
+    color: inherit !important;
+  }
+  & .card-layout .date {
+    color: var(--mail-text-2) !important;
+    opacity: 1 !important;
+    font-size: 0.9rem !important;
+    font-weight: 400 !important;
+  }
+  & .card-layout .thread-card-subject-container {
+    padding-inline-start: 3px !important;   /* under the sender's name */
+  }
+  & .card-layout .tree-button-more {
+    display: none !important;
+  }
+  /* a flagged message keeps its flag, also a closed conversation with a flagged message (the add-on marks it) */
+  & .card-layout:not([data-properties~="flagged"], [mbp115QuickActions-flagged]) .button-star {
+    display: none !important;
+  }
+  & .card-layout[mbp115QuickActions-attach] .attachment-icon {
+    display: inline !important;
+  }
+  /* paperclip and flag as big as Mail's: a little more than the text's height */
+  & .card-layout .attachment-icon {
+    inline-size: 16px !important;
+    block-size: 16px !important;
+    color: var(--mail-text-2) !important;
+    opacity: 1 !important;
+  }
+  & .card-layout .button-star {
+    inline-size: 18px !important;
+    block-size: 18px !important;
+    min-inline-size: 0 !important;
+    min-block-size: 0 !important;
+    padding: 0 !important;
+    background-size: 16px !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+  }
+  & .card-layout:is([data-properties~="flagged"], [mbp115QuickActions-flagged]) .button-star {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23ff3b30' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 17V3.75'/><path d='M5 4.25h9.5l-2.25 3.5 2.25 3.5H5z' fill='%23ff3b30'/></svg>") !important;
+    opacity: 1 !important;
+  }
+
+  /* an open conversation: its messages on a light accent ground, without Thunderbird's thread line */
+  & .card-layout[data-properties~="thread-children"] td {
+    padding-inline-start: var(--tree-card-inline) !important;
+    &::before, &::after {
+      display: none !important;
+    }
+  }
+  & .card-layout[data-properties~="thread-children"]:not(.selected) .card-container {
+    background-color: color-mix(in srgb, var(--mail-accent) 9%, transparent) !important;
+    border-radius: 0 !important;
+  }
+  /* replied or forwarded: the arrow in the left column, where the unread dot sits (an unread one shows the dot) */
+  & .card-layout :is(.thread-card-row, .thread-card-column) {
+    position: static !important;
+  }
+  & .card-layout .state:is(.replied, .forwarded, .redirected) {
+    position: absolute !important;
+    inset-inline-start: 3px !important;
+    inset-block-start: 9px !important;
+    inline-size: 17px !important;
+    block-size: 17px !important;
+  }
+  /* Mail's arrows, the kit's icons (Thunderbird's are drawn small inside their box) */
+  & .card-layout[data-properties~="replied"] .state.replied {
+    content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%237c7c80' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 5 3.75 9.25 8 13.5'/><path d='M4 9.25h7.25a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important;
+  }
+  & .card-layout[data-properties~="forwarded"] .state.forwarded {
+    content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%237c7c80' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5l4.25 4.25L12 13.5'/><path d='M16 9.25H8.75A4.75 4.75 0 0 0 4 14v1'/></svg>") !important;
+    fill: var(--mail-text-2) !important;
+    stroke: var(--mail-text-2) !important;
+  }
+  & .card-layout[data-properties~="unread"] .state {
+    display: none !important;
+  }
+}
+
+/* --- the filter bar (the funnel button above the list) like Mail's: a round search field without the shortcut hint,
+ * the filters as one capsule, the active one in the accent colour */
+#quick-filter-bar {
+  background: var(--mail-bg) !important;
+  border: none !important;
+  border-block-end: 1px solid var(--mail-line) !important;
+  padding: 4px 8px 6px !important;
+}
+#qfb-qs-textbox {
+  --button-border-radius: 16px;
+  --search-bar-background: light-dark(#f2f2f4, #2c2c2e);
+  --search-bar-focus-background: light-dark(#f2f2f4, #2c2c2e);
+  --search-bar-border-color: transparent;
+}
+#qfb-qs-textbox .kbd-container {
+  display: inline-block !important;
+  max-inline-size: 100% !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  vertical-align: top !important;
+}
+#qfb-qs-textbox .kbd-container kbd:first-of-type {
+  visibility: hidden !important;
+  padding-inline-end: 100vw !important;
+}
+:is(.button-group.quickFilterButtons, #qfb-sticky) {
+  background-color: light-dark(#f2f2f4, #2c2c2e) !important;
+  border: none !important;
+  border-radius: 16px !important;
+}
+.button-group.quickFilterButtons {
+  padding: 2px !important;
+  gap: 2px !important;
+  & > .button {
+    border: none !important;
+    border-radius: 14px !important;
+    background-color: transparent !important;
+    margin: 0 !important;
+  }
+  & > .button:hover {
+    background-color: var(--mail-hover) !important;
+  }
+}
+/* toggle buttons without Thunderbird's little bar for "on": the pressed state is the background, as on macOS */
+.check-button {
+  --button-pressed-indicator-padding: 0px !important;
+  &::before {
+    display: none !important;
+  }
+}
+#threadPaneHeaderBar .check-button[aria-pressed="true"] {
+  background-color: var(--mail-selected) !important;
+  border-radius: 14px !important;
+}
+:is(.button-group.quickFilterButtons > .button, #qfb-sticky)[aria-pressed="true"] {
+  background-color: var(--mail-accent) !important;
+  color: var(--mail-accent-text) !important;
+}
+
+/* quick actions under the pointer (Mail has swipes and hover buttons): the kit's add-on Mail Quick Actions shows
+ * read/unread, flag, archive and delete; without it, the flag and the message menu bottom right */
+:root:not([mbp115-quick-actions]) #threadTree[rows="thread-card"] .card-layout:hover {
+  & :is(.thread-card-row, .thread-card-column) {
+    position: static !important;   /* the menu button is placed in the whole row, not in its first line */
+  }
+  & .tree-button-more {
+    display: inline-flex !important;
+    position: absolute !important;
+    inset-inline-end: 6px !important;
+    inset-block-end: 5px !important;
+    opacity: .8 !important;
+  }
+  & .thread-card-icon-info {
+    margin-inline-end: 26px !important;
+  }
+  & .button-star {
+    display: inline-flex !important;
+  }
+}
+
+/* the add-on's buttons cover the date of the row under the pointer */
+:root[mbp115-quick-actions] #threadTree[rows="thread-card"] .card-layout:hover .date {
+  visibility: hidden !important;
+}
+
+/* --- message header: a card on a light grey ground with the message under it, the subject under the name (Mail 26) */
+#messagepanebox {
+  background-color: light-dark(#f5f5f7, #1c1c1e) !important;
+}
+#messageHeader {
+  background: var(--mail-bg) !important;
+  border: none !important;
+  border-radius: 12px 12px 0 0 !important;
+  margin: 10px 12px 0 !important;
+}
+#messagepane {
+  margin: 0 12px 12px !important;
+  border-radius: 0 0 12px 12px !important;
+  overflow: clip !important;
+}
+#messageHeader > * {   /* the header itself is the grid */
+  order: 2;
+}
+#headerSenderToolbarContainer {
+  order: 0 !important;
+}
+#headerSubjectSecurityContainer {
+  order: 1 !important;
+}
+#messageHeader #expandedsubjectBox,
+#messageHeader #expandedsubjectBox * {
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+}
+/* the sender's name only, like Mail (the address is in the name's menu) */
+#expandedfromRow .recipient-multi-line-name {
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+}
+#expandedfromRow .recipient-multi-line-address {
+  display: none !important;
+}
+.message-header-datetime,
+#dateLabel {
+  color: var(--mail-text-2) !important;
+}
+/* Mail's actions under the sender, in a capsule while the pointer is over the message: Delete | Reply, Reply All,
+ * Forward (Thunderbird decides which reply buttons fit the message). Archive, Junk, the flag and the ⋮ menu are in
+ * the toolbar and the ≡ menu, as in Mail. */
+#messageHeader {
+  position: relative !important;
+  padding-block-end: 40px !important;
+}
+#header-view-toolbox {
+  position: absolute !important;
+  inset-block-end: 6px !important;
+  inset-inline-start: 50% !important;
+  transform: translateX(-50%) !important;
+}
+#header-view-toolbar {
+  background: var(--mail-bg) !important;
+  border: 1px solid light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .14)) !important;
+  border-radius: 16px !important;
+  padding: 1px 8px !important;
+  gap: 4px !important;
+  flex-wrap: nowrap !important;
+}
+#messagepanebox:not(:hover) #header-view-toolbar {
+  visibility: hidden !important;
+}
+#header-view-toolbar > :is(#hdrArchiveButton, #hdrJunkButton, #otherActionsButton, #starMessageButton) {
+  display: none !important;
+}
+/* Reply All always, as in Mail (with one recipient it answers the sender); its inner button inherits "hidden" */
+#hdrReplyAllButton[hidden],
+#hdrReplyAllButton[hidden] > .toolbarbutton-menubutton-button {
+  display: flex !important;
+}
+#hdrTrashButton {
+  order: -1 !important;
+  margin-inline-end: 6px !important;
+}
+#header-view-toolbar .toolbarbutton-icon {
+  inline-size: 20px !important;
+  block-size: 20px !important;
+}
+#messageHeader :is(.hdrReplyToSenderButton, .hdrDummyReplyButton, .hdrReplyButton) { list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236e6e73' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 5 3.75 9.25 8 13.5'/><path d='M4 9.25h7.25a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+#messageHeader .hdrReplyAllButton { list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236e6e73' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M7.25 5 3 9.25l4.25 4.25'/><path d='M10.75 5 6.5 9.25l4.25 4.25'/><path d='M6.75 9.25h5.5a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+#messageHeader .hdrForwardButton { list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236e6e73' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5l4.25 4.25L12 13.5'/><path d='M16 9.25H8.75A4.75 4.75 0 0 0 4 14v1'/></svg>") !important; }
+#messageHeader .hdrTrashButton:not([data-imap-deleted="true"]) { list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236e6e73' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M8 5.5V4.25h4V5.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8.25 8.5v5'/><path d='M11.75 8.5v5'/></svg>") !important; }
+@media (prefers-color-scheme: dark) {
+  #messageHeader :is(.hdrReplyToSenderButton, .hdrDummyReplyButton, .hdrReplyButton) { list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23aeaeb2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 5 3.75 9.25 8 13.5'/><path d='M4 9.25h7.25a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+  #messageHeader .hdrReplyAllButton { list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23aeaeb2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M7.25 5 3 9.25l4.25 4.25'/><path d='M10.75 5 6.5 9.25l4.25 4.25'/><path d='M6.75 9.25h5.5a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+  #messageHeader .hdrForwardButton { list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23aeaeb2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5l4.25 4.25L12 13.5'/><path d='M16 9.25H8.75A4.75 4.75 0 0 0 4 14v1'/></svg>") !important; }
+  #messageHeader .hdrTrashButton:not([data-imap-deleted="true"]) { list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23aeaeb2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M8 5.5V4.25h4V5.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8.25 8.5v5'/><path d='M11.75 8.5v5'/></svg>") !important; }
+}
+/* the attachments as a capsule beside the actions, like the paperclip in Mail's: count, names, Save (Thunderbird's
+ * bar, moved up into the header's last row; the actions move left of the middle while it is there) */
+#singleMessage {
+  order: -3 !important;
+}
+#attachmentView {
+  order: -2 !important;
+  position: relative !important;
+  z-index: 1 !important;
+  margin: -36px 12px 0 !important;
+  background: transparent !important;
+}
+#attachment-splitter {
+  display: none !important;   /* it would sit below the message now */
+}
+#attachmentBar {
+  box-sizing: border-box !important;
+  inline-size: fit-content !important;
+  max-inline-size: calc(50% - 16px) !important;
+  block-size: 30px !important;
+  margin: 0 0 6px calc(50% + 3px) !important;
+  padding: 0 4px 0 6px !important;
+  background-color: var(--mail-bg) !important;
+  color: var(--mail-text-2) !important;
+  border: 1px solid light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .14)) !important;
+  border-radius: 16px !important;
+}
+#attachmentBar :is(#attachmentNameSep, #attachmentName, #attachmentSize) {
+  display: none !important;   /* "1 attachment" and Save, as short as Mail's; the arrow opens the list with the names */
+}
+#messagepanebox:not(:hover) #attachmentBar {
+  visibility: hidden !important;   /* appears with the actions; the paperclip by the date shows there is one */
+}
+#messageHeader:has(#starMessageButton[aria-pressed="true"]) #dateLabel::before {
+  content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='16' height='16' fill='none' stroke='%23ff3b30' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M5 17V3.75'/><path d='M5 4.25h9.5l-2.25 3.5 2.25 3.5H5z' fill='%23ff3b30'/></svg>");
+  display: inline-block;
+  inline-size: 15px;
+  block-size: 15px;
+  margin-inline-end: 6px;
+  vertical-align: -2px;
+}
+#messagepanebox:has(> #attachmentView:not([collapsed])) #dateLabel::after {
+  content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238e8e93' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M13.5 7.5 8.6 12.4a1.6 1.6 0 0 1-2.3-2.3l5.6-5.6a3 3 0 0 1 4.3 4.3l-6 6a4.4 4.4 0 0 1-6.2-6.2L9.5 3.1'/></svg>");
+  display: inline-block;
+  inline-size: 15px;
+  block-size: 15px;
+  margin-inline-start: 6px;
+  vertical-align: -2px;
+}
+#messagepanebox:has(> #attachmentView:not([collapsed])) #header-view-toolbox {
+  transform: translateX(calc(-100% - 3px)) !important;
+}
+#attachmentList {
+  background-color: var(--mail-bg) !important;
+  max-block-size: 30vh !important;
+}
+/* "remote content blocked": Mail's quiet grey bar instead of the yellow warning */
+#mail-notification-top {
+  border: none !important;
+}
+#mail-notification-top :is(notification-message, moz-message-bar) {
+  --message-bar-background-color: light-dark(#f2f2f4, #2c2c2e) !important;
+  --message-bar-border-color: transparent !important;
+  --message-bar-text-color: var(--mail-text) !important;
+  --message-bar-icon-color: var(--mail-text-2) !important;
+  --message-bar-border-radius: 8px !important;
+  margin: 6px 12px !important;
+}
+#messageHeader .recipient-avatar:not(.has-avatar) {
+  background: linear-gradient(light-dark(#b4b4b9, #8e8e93), light-dark(#8e8e93, #636366)) !important;
+  color: #ffffff !important;
+}
+
+/* the kit's icons (Mail Quick Actions) draw with the stroke colour: give it to the menu items; the spaces button
+ * (sidebar symbol next to the window buttons) gets the kit's icon directly, like the toolbar */
+:is(#spacesToolbar, menupopup) :is(.toolbarbutton-icon, .menu-icon, img) {
+  -moz-context-properties: fill, stroke, fill-opacity !important;
+  stroke: currentColor;
+}
+#spacesPinnedButton .toolbarbutton-icon {
+  inline-size: 18px !important;   /* SVGs without a size of their own are drawn 0 px wide here */
+  block-size: 18px !important;
+}
+#spacesPinnedButton {
+  list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='16' height='16' fill='none' stroke='%23575757' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='14' height='12' rx='2'/><path d='M8 4v12M4.75 7h1.5M4.75 9.5h1.5'/></svg>") !important;
+}
+@media (prefers-color-scheme: dark) {
+  #spacesPinnedButton {
+    list-style-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' width='16' height='16' fill='none' stroke='%23d0d0d4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='14' height='12' rx='2'/><path d='M8 4v12M4.75 7h1.5M4.75 9.5h1.5'/></svg>") !important;
+  }
+}
+
+/* --- menus like macOS 26: rounder, the item under the pointer in the accent colour; the icon row of the message
+ * menu (read, reply, archive, junk, delete) with the kit's icons */
+menupopup {
+  --panel-border-radius: 12px !important;
+  --panel-padding: 5px 0 !important;
+  --panel-background-color: light-dark(#ffffff, #2c2c2e) !important;
+  --panel-border-color: light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .12)) !important;
+  --panel-text-color: light-dark(#1d1d1f, #f5f5f7) !important;
+}
+menupopup > :is(menu, menuitem) {
+  border-radius: 6px !important;
+  min-block-size: 22px !important;
+  padding-block: 2px !important;
+  margin-inline: 5px !important;
+}
+menupopup > :is(menu, menuitem):not([disabled])[_moz-menuactive] {
+  background-color: var(--mail-accent, AccentColor) !important;
+  color: var(--mail-accent-text, AccentColorText) !important;
+}
+#mailContext-navigation > .menuitem-iconic > .menu-icon {
+  inline-size: 20px !important;
+  block-size: 20px !important;
+}
+#navContext-markRead, #navContext-markUnread { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4.75' width='14' height='10.5' rx='2'/><path d='m3.5 5.75 6.5 5 6.5-5'/></svg>") !important; }
+#navContext-reply { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 5 3.75 9.25 8 13.5'/><path d='M4 9.25h7.25a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+#navContext-archive { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 4.5h13v3h-13z'/><path d='M4.75 7.5v7A1.5 1.5 0 0 0 6.25 16h7.5a1.5 1.5 0 0 0 1.5-1.5v-7'/><path d='M8.25 10.25h3.5'/></svg>") !important; }
+#navContext-markAsJunk, #navContext-markAsNotJunk { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8 8.75l4 4'/><path d='M12 8.75l-4 4'/></svg>") !important; }
+#navContext-delete { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M8 5.5V4.25h4V5.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8.25 8.5v5'/><path d='M11.75 8.5v5'/></svg>") !important; }
+@media (prefers-color-scheme: dark) {
+  #navContext-markRead, #navContext-markUnread { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4.75' width='14' height='10.5' rx='2'/><path d='m3.5 5.75 6.5 5 6.5-5'/></svg>") !important; }
+  #navContext-reply { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M8 5 3.75 9.25 8 13.5'/><path d='M4 9.25h7.25a4.75 4.75 0 0 1 4.75 4.75v1'/></svg>") !important; }
+  #navContext-archive { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.5 4.5h13v3h-13z'/><path d='M4.75 7.5v7A1.5 1.5 0 0 0 6.25 16h7.5a1.5 1.5 0 0 0 1.5-1.5v-7'/><path d='M8.25 10.25h3.5'/></svg>") !important; }
+  #navContext-markAsJunk, #navContext-markAsNotJunk { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8 8.75l4 4'/><path d='M12 8.75l-4 4'/></svg>") !important; }
+  #navContext-delete { --menuitem-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23f2f2f7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3.75 5.5h12.5'/><path d='M8 5.5V4.25h4V5.5'/><path d='M5.25 5.5l.75 9.6A1.5 1.5 0 0 0 7.5 16.5h5a1.5 1.5 0 0 0 1.5-1.4l.75-9.6'/><path d='M8.25 8.5v5'/><path d='M11.75 8.5v5'/></svg>") !important; }
+}
+
+/* --- a message in its own window (double-click): the toolbar like the main window's, icons in capsules, the menu
+ * bar behind Alt (#mail-bar3 exists only there; the reply buttons are in the message header, as in the main window) */
+#mail-toolbox {
+  background: var(--mail-bg) !important;
+  border: none !important;
+}
+#mail-bar3 {
+  padding: 6px 10px !important;
+  border: none !important;
+  & .toolbarbutton-text,
+  & toolbarseparator {
+    display: none !important;
+  }
+  & .toolbarbutton-1 {
+    background: light-dark(#ffffff, #3a3a3c) !important;
+    border: 1px solid light-dark(rgba(0, 0, 0, .1), rgba(255, 255, 255, .12)) !important;
+    border-radius: 16px !important;
+    padding: 2px 7px !important;
+    margin-inline: 3px !important;
+  }
+  & .toolbarbutton-icon {
+    inline-size: 28px !important;   /* as big as the main window's */
+    block-size: 28px !important;
+  }
+}
+/* the add-on's buttons in Mail's groups: Reply, Reply All, Forward | Archive, Delete, Junk */
+#mail-bar3 :is(#mbp115QuickActions-reply, #mbp115QuickActions-replyAll, #mbp115QuickActions-archive,
+    #mbp115QuickActions-delete) {
+  border-start-end-radius: 0 !important;
+  border-end-end-radius: 0 !important;
+  border-inline-end: none !important;
+  margin-inline-end: 0 !important;
+}
+#mail-bar3 :is(#mbp115QuickActions-replyAll, #mbp115QuickActions-forward, #mbp115QuickActions-delete,
+    #mbp115QuickActions-junk) {
+  border-start-start-radius: 0 !important;
+  border-end-start-radius: 0 !important;
+  border-inline-start: none !important;
+  margin-inline-start: 0 !important;
+}
+/* no hairline under it (Thunderbird's separator before the message) */
+.mail-toolbox::after,
+.contentTabToolbox::after {
+  display: none !important;
+}
+#toolbar-menubar[inactive] {
+  display: none !important;
+}
+
+/* --- compose window like Mail's: Send as a round accent button first, the other actions as icons, From / To /
+ * Subject as plain rows with hairlines instead of boxed fields, the formatting bar flat */
+#compose-toolbox,
+#MsgHeadersToolbar {
+  background: var(--mail-bg) !important;
+  border: none !important;
+}
+#composeToolbar2 {
+  padding: 6px 10px !important;
+  border: none !important;
+  & .toolbarbutton-text {
+    display: none !important;
+  }
+  & toolbarbutton {
+    border-radius: 8px !important;
+  }
+  & .toolbarbutton-icon {
+    inline-size: 20px !important;
+    block-size: 20px !important;
+  }
+  & toolbarseparator {
+    display: none !important;
+  }
+}
+#button-send {
+  background: var(--mail-accent) !important;
+  color: var(--mail-accent-text) !important;
+  border-radius: 16px !important;
+  padding: 4px 14px !important;
+  margin-inline-end: 8px !important;
+  &[disabled] {
+    opacity: .45 !important;
+  }
+}
+#MsgHeadersToolbar {
+  padding: 2px 16px 0 !important;
+}
+#top-gradient-box,
+#recipientsContainer .address-row:not(.hidden),
+#subject-box {
+  border-block-end: 1px solid var(--mail-line) !important;
+  padding-block: 3px !important;
+}
+:is(#msgIdentity, #msgSubject, .address-container) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+:is(#identityLabel, #subjectLabel, .address-label-container label) {
+  color: var(--mail-text-2) !important;
+  font-weight: 400 !important;
+}
+#compose-toolbar-menubar2[inactive] {
+  display: none !important;   /* the menu bar shows while Alt is held, as Thunderbird's autohide does */
+}
+#FormatToolbox {
+  background: transparent !important;
+  border: none !important;
+}
+#FormatToolbar {
+  background: transparent !important;
+  border: none !important;
+  border-block-end: 1px solid var(--mail-line) !important;
+  padding-inline: 12px !important;
+}
+
+/* --- Calendar like macOS Calendar: events as a light tint of their calendar's colour with a bar on the left, today
+ * in red (header and mini month), no tinted today column, a quiet grid */
+:root {
+  --viewTodayBackground: var(--viewBackground) !important;
+  --viewTodayDayLabelBackground: transparent !important;
+  --viewTodayWeekendBackground: var(--viewWeekendBackground) !important;
+  --viewTodayOffBackground: var(--viewWeekendBackground) !important;
+  --viewTodayLabelBackground: #ff3b30 !important;
+  --viewTodayLabelColor: #ffffff !important;
+  --viewWeekendBackground: light-dark(#f7f7f9, #242426) !important;
+  --viewBorderColor: var(--mail-line) !important;
+  --viewCalendarHeaderBackground: transparent !important;
+}
+:is(calendar-event-box, calendar-editable-item, calendar-month-day-box-item).calendar-color-box,
+.calendar-color-box:is(calendar-event-box, calendar-editable-item) {
+  background-color: color-mix(in srgb, var(--item-backcolor) 20%, var(--mail-bg)) !important;
+  color: color-mix(in srgb, var(--item-backcolor) 70%, var(--mail-text)) !important;
+  border-inline-start: 3px solid var(--item-backcolor) !important;
+  border-radius: 5px !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+}
+:is(calendar-event-box, calendar-editable-item, calendar-month-day-box-item)[selected].calendar-color-box {
+  background-color: var(--item-backcolor) !important;
+  color: #ffffff !important;
+}
+/* the selected day is not tinted (Thunderbird marks it like a selection), today's heading is red */
+:root {
+  --viewDayBoxSelectedBackground: var(--viewBackground) !important;
+  --viewHighlightBorderColor: var(--viewBorderColor) !important;
+}
+.day-column-selected .day-column-heading {
+  color: inherit !important;
+}
+.day-column-today .day-column-heading,
+calendar-day-label[relation="today"] {
+  color: #ff3b30 !important;
+  --selected-item-color: #ff3b30;
+}
+/* the list "Events in the next 7 days" above the week: not in Mail's calendar */
+#bottom-events-box,
+#calendar-view-splitter {
+  display: none !important;
+}
+.calendar-month-day-box-date-label[relation="today"] {
+  background-color: #ff3b30 !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+}
+.minimonth-day[today="true"] {
+  background-color: #ff3b30 !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+}
+.minimonth-day[selected]:not([today="true"]) {
+  background-color: light-dark(#e3e3e6, #3a3a3c) !important;
+  border-color: transparent !important;
+  color: inherit !important;
+  border-radius: 50% !important;
+}
+#calendar-list-pane,
+#calendar-sidebar {
+  background: var(--mail-sidebar) !important;
+}
+
+/* --- window buttons as the three coloured circles, sized like MacTahoe's GTK ones: 14 px, 24 px apart */
+.titlebar-buttonbox {
+  --titlebar-button-spacing: 5px !important;
+  --titlebar-button-end-spacing: 5px !important;
+  padding-inline: 10px 6px !important;
+}
+.titlebar-button > .toolbarbutton-icon {
+  appearance: none !important;
+  background-image: none !important;
+  inline-size: 14px !important;
+  block-size: 14px !important;
+  border-radius: 50% !important;
+  border: 0.5px solid rgba(0, 0, 0, .12) !important;
+}
+.titlebar-close > .toolbarbutton-icon { background-color: #ff5f57 !important; }
+.titlebar-min > .toolbarbutton-icon { background-color: #febc2e !important; }
+:is(.titlebar-max, .titlebar-restore) > .toolbarbutton-icon { background-color: #28c840 !important; }
+.titlebar-button:hover > .toolbarbutton-icon {
+  filter: brightness(.85);
+}
+.titlebar-button:-moz-window-inactive > .toolbarbutton-icon {
+  background-color: light-dark(#dcdcdc, #4b4b4d) !important;
+}

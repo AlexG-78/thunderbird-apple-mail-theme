@@ -1,0 +1,6 @@
+{
+  "uuid": "mbp115-mail-shot@alexg-78",
+  "name": "Mail look headless test",
+  "description": "Starts Thunderbird with a test profile in a headless shell and takes a screenshot. Test use only.",
+  "shell-version": ["51"]
+}

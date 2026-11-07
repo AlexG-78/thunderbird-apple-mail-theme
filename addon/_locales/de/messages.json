@@ -1,0 +1,53 @@
+{
+  "name": {
+    "message": "Mail-Schnellaktionen"
+  },
+  "description": {
+    "message": "Die Nachrichtenliste von Apples Mail: Knöpfe an der Nachricht unter dem Zeiger (gelesen oder ungelesen, markieren, archivieren, löschen), Konversationen, Kontaktbilder (mbp115-Kit)."
+  },
+  "read": {
+    "message": "Als gelesen markieren"
+  },
+  "unread": {
+    "message": "Als ungelesen markieren"
+  },
+  "flag": {
+    "message": "Markieren"
+  },
+  "unflag": {
+    "message": "Markierung entfernen"
+  },
+  "archive": {
+    "message": "Archivieren"
+  },
+  "delete": {
+    "message": "Löschen"
+  },
+  "optHint": {
+    "message": "Thunderbirds eigene Ansicht-Einstellungen gehen weiter; dies schaltet einen Ordner ohne Threads wieder auf Threads."
+  },
+  "optThreads": {
+    "message": "Nachrichten nach Konversation gruppieren (jeder Ordner zeigt Threads, eingeklappt)"
+  },
+  "optPictures": {
+    "message": "Kontaktbilder neben den Nachrichten zeigen (aus dem Adressbuch, sonst die Initialen)"
+  },
+  "optPreview": {
+    "message": "Zwei Zeilen jeder Nachricht unter dem Betreff zeigen (aus den auf diesem Computer gespeicherten Nachrichten)"
+  },
+  "optBackspace": {
+    "message": "Rücktaste löscht die ausgewählte Nachricht (in der Nachrichtenliste; Strg+Z holt sie zurück)"
+  },
+  "reply": {
+    "message": "Antworten"
+  },
+  "replyAll": {
+    "message": "Allen antworten"
+  },
+  "forward": {
+    "message": "Weiterleiten"
+  },
+  "junk": {
+    "message": "Werbung"
+  }
+}

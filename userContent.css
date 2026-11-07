@@ -1,0 +1,100 @@
+/* Thunderbird like Apple's Mail (mbp115 kit, tools/mail, MIT): the address book (about:addressbook runs as a content
+ * page, so its look lives here, not in userChrome.css), only for that page. */
+@-moz-document url-prefix("about:addressbook") {
+  :root {
+    --mail-accent: AccentColor;
+    --mail-accent-text: AccentColorText;
+    --mail-text: light-dark(#1d1d1f, #f5f5f7);
+    --mail-text-2: light-dark(#86868b, #98989d);
+    --mail-bg: light-dark(#ffffff, #1e1e1e);
+    --mail-sidebar: light-dark(#f2f2f4, #262628);
+    --mail-line: light-dark(rgba(0, 0, 0, .09), rgba(255, 255, 255, .09));
+    --mail-hover: light-dark(rgba(0, 0, 0, .05), rgba(255, 255, 255, .06));
+    --mail-selected: light-dark(rgba(0, 0, 0, .09), rgba(255, 255, 255, .11));
+    --mail-flag: light-dark(#ff3b30, #ff453a);
+    --mail-radius: 7px;
+  }
+
+  /* --- Contacts like macOS Contacts: a plain list of names, the selected one in the accent colour; the card with a big
+   * picture and the name centred, actions as capsules, fields as label / value rows without boxes */
+  #booksPane {
+    background: var(--mail-sidebar) !important;
+  }
+  #cards {
+    border: none !important;
+  }
+  tr[is="ab-card-row"] td > .card-container {
+    background: transparent !important;
+    border: none !important;
+    border-block-end: 1px solid var(--mail-line) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  tr[is="ab-card-row"].selected td > .card-container {
+    background: var(--mail-accent) !important;
+    color: var(--mail-accent-text) !important;
+    border-radius: 7px !important;
+  }
+  tr[is="ab-card-row"] .ab-card-first-line {
+    font-weight: 600 !important;
+  }
+  tr[is="ab-card-row"] .ab-card-second-line {
+    display: none !important;   /* names only, as in Contacts; the address is on the card */
+  }
+  tr[is="ab-card-row"] .recipient-avatar {
+    background: linear-gradient(light-dark(#b4b4b9, #8e8e93), light-dark(#8e8e93, #636366)) !important;
+    color: #ffffff !important;
+  }
+  #detailsPane {
+    background: var(--mail-bg) !important;
+  }
+  #viewContact .contact-header {
+    grid-template: "photo" auto "headings" auto / 1fr !important;
+    justify-items: center !important;
+    text-align: center !important;
+    margin-block: 20px 22px !important;
+  }
+  #viewContactPhoto {
+    --ab-contact-photo-size: 104px;
+    background: linear-gradient(light-dark(#b4b4b9, #8e8e93), light-dark(#8e8e93, #636366)) !important;
+    stroke: #ffffff !important;
+  }
+  #viewContact .contact-headings {
+    align-items: center !important;
+  }
+  #viewContact .contact-heading-name {
+    font-size: 1.7rem !important;
+    font-weight: 600 !important;
+  }
+  #detailsActions {
+    justify-content: center !important;
+    gap: 8px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  #detailsActions :is(button, .button) {
+    background: light-dark(#f2f2f4, #3a3a3c) !important;
+    border: 1px solid light-dark(rgba(0, 0, 0, .1), rgba(255, 255, 255, .12)) !important;
+    border-radius: 16px !important;
+    padding-inline: 14px !important;
+  }
+  #detailsBody section:not(#detailsActions) {
+    background: transparent !important;
+    border: none !important;
+    border-block-start: 1px solid var(--mail-line) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding-inline: 0 !important;
+  }
+  #detailsBody section h2 {
+    font-size: .85rem !important;
+    font-weight: 400 !important;
+    color: var(--mail-text-2) !important;
+  }
+  #detailsBody .entry-type {
+    color: var(--mail-text-2) !important;
+    text-transform: lowercase !important;
+    font-weight: 400 !important;
+  }
+}

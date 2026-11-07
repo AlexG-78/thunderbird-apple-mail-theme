@@ -1,0 +1,55 @@
+[
+  {
+    "namespace": "quickActions",
+    "functions": [
+      {
+        "name": "attach",
+        "type": "function",
+        "async": true,
+        "description": "Adds the quick-action buttons to the message list of a mail tab.",
+        "parameters": [
+          {
+            "name": "tabId",
+            "type": "integer"
+          },
+          {
+            "name": "labels",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      {
+        "name": "setOptions",
+        "type": "function",
+        "description": "Conversations, pictures, previews and Backspace to delete on or off (from the add-on's settings).",
+        "parameters": [
+          {
+            "name": "options",
+            "type": "object",
+            "properties": {
+              "threads": {
+                "type": "boolean",
+                "optional": true
+              },
+              "pictures": {
+                "type": "boolean",
+                "optional": true
+              },
+              "preview": {
+                "type": "boolean",
+                "optional": true
+              },
+              "backspaceDelete": {
+                "type": "boolean",
+                "optional": true
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

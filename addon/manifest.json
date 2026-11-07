@@ -1,0 +1,42 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_name__",
+  "description": "__MSG_description__",
+  "version": "1.16",
+  "author": "AlexG-78 (mbp115 kit)",
+  "default_locale": "en",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "mbp115-quick-actions@alexg-78",
+      "strict_min_version": "128.0"
+    }
+  },
+  "experiment_apis": {
+    "quickActions": {
+      "schema": "api/schema.json",
+      "parent": {
+        "scopes": [
+          "addon_parent"
+        ],
+        "paths": [
+          [
+            "quickActions"
+          ]
+        ],
+        "script": "api/implementation.js"
+      }
+    }
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "permissions": [
+    "storage"
+  ],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": false
+  }
+}

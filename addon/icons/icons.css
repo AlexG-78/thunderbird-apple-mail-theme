@@ -1,0 +1,43 @@
+/* Mail Quick Actions: the kit's line icons in place of Thunderbird's own, in every window (registered as a user
+ * sheet while the add-on runs). Thunderbird's colours still apply: the icons draw with context-stroke. */
+:root {
+  --icon-mail: url("resource://mbp115mail/icons/mail.svg") !important;
+  --icon-address-book: url("resource://mbp115mail/icons/address-book.svg") !important;
+  --icon-calendar: url("resource://mbp115mail/icons/calendar.svg") !important;
+  --icon-tasks: url("resource://mbp115mail/icons/tasks.svg") !important;
+  --icon-chat: url("resource://mbp115mail/icons/chat.svg") !important;
+  --icon-settings: url("resource://mbp115mail/icons/settings.svg") !important;
+  --icon-inbox: url("resource://mbp115mail/icons/inbox.svg") !important;
+  --icon-draft: url("resource://mbp115mail/icons/draft.svg") !important;
+  --icon-template: url("resource://mbp115mail/icons/template.svg") !important;
+  --icon-sent: url("resource://mbp115mail/icons/sent.svg") !important;
+  --icon-folder: url("resource://mbp115mail/icons/folder.svg") !important;
+  --icon-collapse: url("resource://mbp115mail/icons/collapse.svg") !important;
+  --icon-spaces-menu: url("resource://mbp115mail/icons/spaces-menu.svg") !important;
+  --icon-attachment: url("resource://mbp115mail/icons/attachment.svg") !important;
+  --icon-download: url("resource://mbp115mail/icons/download.svg") !important;
+  --icon-print: url("resource://mbp115mail/icons/print.svg") !important;
+  --icon-search: url("resource://mbp115mail/icons/search.svg") !important;
+  --icon-lock: url("resource://mbp115mail/icons/lock.svg") !important;
+  --icon-spelling: url("resource://mbp115mail/icons/spelling.svg") !important;
+  --icon-archive: url("resource://mbp115mail/icons/archive.svg") !important;
+  --icon-spam: url("resource://mbp115mail/icons/spam.svg") !important;
+  --icon-trash: url("resource://mbp115mail/icons/trash.svg") !important;
+  --icon-reply: url("resource://mbp115mail/icons/reply.svg") !important;
+  --icon-reply-all: url("resource://mbp115mail/icons/reply-all.svg") !important;
+  --icon-forward: url("resource://mbp115mail/icons/forward.svg") !important;
+  --icon-new-mail: url("resource://mbp115mail/icons/new-mail.svg") !important;
+  --icon-star: url("resource://mbp115mail/icons/star.svg") !important;
+  --icon-file: url("resource://mbp115mail/icons/file.svg") !important;
+  --icon-unread: url("resource://mbp115mail/icons/unread.svg") !important;
+  --icon-tag: url("resource://mbp115mail/icons/tag.svg") !important;
+  --icon-pin: url("resource://mbp115mail/icons/pin.svg") !important;
+  --icon-filter: url("resource://mbp115mail/icons/filter.svg") !important;
+  --spaces-icon-mail: url("resource://mbp115mail/icons/mail.svg") !important;
+  --spaces-icon-address-book: url("resource://mbp115mail/icons/address-book.svg") !important;
+  --spaces-icon-calendar: url("resource://mbp115mail/icons/calendar.svg") !important;
+  --spaces-icon-tasks: url("resource://mbp115mail/icons/tasks.svg") !important;
+  --spaces-icon-chat: url("resource://mbp115mail/icons/chat.svg") !important;
+  --spaces-icon-settings: url("resource://mbp115mail/icons/settings.svg") !important;
+  --spaces-icon-collapse: url("resource://mbp115mail/icons/collapse.svg") !important;
+}

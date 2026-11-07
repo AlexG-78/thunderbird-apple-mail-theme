@@ -1,0 +1,9 @@
+{
+  "manifest_version": 2,
+  "name": "mbp115 mail test",
+  "description": "Headless test only: shows the test inbox and selects a message.",
+  "version": "1.0",
+  "browser_specific_settings": {"gecko": {"id": "mbp115-mail-test@alexg-78"}},
+  "permissions": ["accountsRead", "accountsFolders", "messagesRead", "addressBooks"],
+  "background": {"scripts": ["background.js"]}
+}

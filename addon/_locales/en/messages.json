@@ -1,0 +1,53 @@
+{
+  "name": {
+    "message": "Mail Quick Actions"
+  },
+  "description": {
+    "message": "Apple Mail's message list: buttons on the message under the pointer (read or unread, flag, archive, delete), conversations, contact pictures (mbp115 kit)."
+  },
+  "read": {
+    "message": "Mark as Read"
+  },
+  "unread": {
+    "message": "Mark as Unread"
+  },
+  "flag": {
+    "message": "Flag"
+  },
+  "unflag": {
+    "message": "Remove Flag"
+  },
+  "archive": {
+    "message": "Archive"
+  },
+  "delete": {
+    "message": "Delete"
+  },
+  "optHint": {
+    "message": "Thunderbird's own view settings still work; this switches a folder shown without threads back to threads."
+  },
+  "optThreads": {
+    "message": "Group messages by conversation (every folder shows threads, collapsed)"
+  },
+  "optPictures": {
+    "message": "Show contact pictures next to messages (from the address book, else the initials)"
+  },
+  "optPreview": {
+    "message": "Show two lines of each message under its subject (read from the messages stored on this computer)"
+  },
+  "optBackspace": {
+    "message": "Backspace deletes the selected message (in the message list; Ctrl+Z brings it back)"
+  },
+  "reply": {
+    "message": "Reply"
+  },
+  "replyAll": {
+    "message": "Reply All"
+  },
+  "forward": {
+    "message": "Forward"
+  },
+  "junk": {
+    "message": "Junk"
+  }
+}

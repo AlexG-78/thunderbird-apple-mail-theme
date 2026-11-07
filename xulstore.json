@@ -1,0 +1,32 @@
+{
+  "chrome://messenger/content/messenger.xhtml": {
+    "unifiedToolbar": {
+      "state": "{\"mail\":[\"write-message\",\"reply\",\"reply-all\",\"forward-inline\",\"archive\",\"delete\",\"junk\",\"move-to\",\"mark-as\",\"spacer\",\"search-bar\"]}"
+    },
+    "spacesToolbar": {
+      "hidden": "true"
+    },
+    "folderPaneHeaderBar": {
+      "hidden": "true"
+    },
+    "folderTree": {
+      "mode": "smart"
+    },
+    "messageHeader": {
+      "layout": "{\"showAvatar\":true,\"showBigAvatar\":true,\"showFullAddress\":true,\"hideLabels\":true,\"subjectLarge\":true,\"buttonStyle\":\"only-icons\"}"
+    },
+    "calendar-view-splitter": {
+      "state": "collapsed"
+    }
+  },
+  "chrome://messenger/content/messengercompose/messengercompose.xhtml": {
+    "compose-toolbar-menubar2": {
+      "autohide": "true"
+    }
+  },
+  "chrome://messenger/content/messageWindow.xhtml": {
+    "toolbar-menubar": {
+      "autohide": "true"
+    }
+  }
+}
