@@ -49,5 +49,8 @@
   },
   "junk": {
     "message": "Junk"
+  },
+  "zoomReset": {
+    "message": "Actual Size"
   }
 }

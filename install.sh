@@ -128,7 +128,8 @@ case ${1:-install} in
     echo "   Compose and reply window like Mail's: Send as a round button, actions as icons, plain From/To/Subject rows,"
     echo "        the menu bar behind Alt"
     echo "   Kit add-on Mail Quick Actions: read/unread, flag, archive and delete on the message under the pointer;"
-    echo "        ⌫ deletes the selected messages in the list; dates like Mail (time, Yesterday, weekday);"
+    echo "        ⌫ deletes the selected messages in the list; a pinch zooms the message (level shown, click: 100 %);"
+    echo "        dates like Mail (time, Yesterday, weekday);"
     echo "        conversations (threads, collapsed, with their names, count, flag and paperclip); contact pictures or initials"
     echo "        (address book only); two lines of each message under the subject; the mailbox in the unified Inbox;"
     echo "        toolbar actions over the message; the kit's line icons in place of Thunderbird's own everywhere.

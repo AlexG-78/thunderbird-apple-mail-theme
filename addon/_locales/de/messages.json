@@ -49,5 +49,8 @@
   },
   "junk": {
     "message": "Werbung"
+  },
+  "zoomReset": {
+    "message": "Originalgröße"
   }
 }

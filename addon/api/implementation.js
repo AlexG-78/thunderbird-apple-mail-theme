@@ -11,6 +11,8 @@
  * conversation shows its newest message's date and the names of everyone in it ("A Klein & M Muster").
  * Backspace (and Ctrl+Backspace, which is ⌘⌫ under the kit's keyd) deletes the selected messages while the message
  * list has the focus, as in Mail and Thunderbird for Mac; never in a text field, the folder list or the message.
+ * Pinch: a two-finger pinch on the message zooms it, smoothly, by the pinch's own scale (see pinchZoom).
+ * Zoom level: a capsule in the message header shows it while it is not 100 %; a click goes back to 100 %.
  * Mailbox: in a folder of several folders (the unified Inbox) each card names its mailbox, like Mail's "Inbox - iCloud".
  * Toolbar: the window's toolbar gets the sidebar's width and the message pane's position as CSS variables, so the
  * Mail look draws the grey sidebar up to the top and puts the action buttons over the message, as Mail does.
@@ -131,6 +133,8 @@ function messageWindowAdd(win) {
     }
     item?.setAttribute(`${KEY}-added`, "");
   }
+  pinchZoom(win, true);
+  zoomPill(doc.getElementById("messageBrowser"), windowLabels?.zoomReset);
   watchFlag(doc.getElementById("messageBrowser"), on => {
     // a data: picture is not drawn here; the add-on's own red flag is
     const flag = doc.getElementById(`${KEY}-flag`);
@@ -155,6 +159,127 @@ function watchFlag(browser, set, tries = 40) {
 function messageWindowRemove(win) {
   for (const el of win.document.querySelectorAll(`[${KEY}-added]`))
     el.remove();
+  pinchZoom(win, false);
+}
+
+// Pinch to zoom the message. Gecko turns a touchpad pinch into Ctrl+wheel steps but marks them as handled by its async
+// zoom, which finds nothing to zoom in Thunderbird's message pane (it is not in its own process), so nothing happened.
+// A real Ctrl+wheel step zooms through DoZoomEnlarge/DoZoomReduce, one per DOMMouseScroll, posted while the wheel event
+// is handled: a step without one is a pinch. Its DOMMouseScroll detail is the change of the pinch's scale (which counts
+// from 1 at the gesture's start) x 100 in device pixels, so the message follows the fingers instead of jumping 10 % per
+// step. Headless test (scratchpad pinchtest): pinch 1 -> 1.8 gave zoom 1.81, 1 -> 0.5 gave 0.52, Ctrl+wheel x3 still 1.3.
+// The message's zoom level, which Thunderbird does not show anywhere (bug 512956): like Firefox's in its address bar, a
+// capsule at the right of the header card's last row while the message is not at 100 % (pinch, Ctrl+wheel, ⌘+ ⌘-,
+// the View menu); a click goes back to 100 %, as ⌘0 does. The zoom stays when the next message is shown.
+const zoomPills = new Map();   // about:message window -> its remover
+const ZOOM_CSS = `
+#messageHeader { position: relative; }
+#${KEY}-zoom {
+  position: absolute; z-index: 2; inset-block-end: 8px; inset-inline-end: 12px;
+  appearance: none; margin: 0; padding: 0 10px; min-width: 0; min-height: 0; block-size: 26px;
+  border-radius: 13px; border: 1px solid light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .14));
+  background: var(--mail-bg, light-dark(#ffffff, #2c2c2e)); color: light-dark(#6e6e73, #aeaeb2);
+  font: inherit; font-size: .9em; font-variant-numeric: tabular-nums; cursor: default;
+}
+#${KEY}-zoom:hover { background: light-dark(#ececee, #3a3a3c); color: light-dark(#1d1d1f, #f5f5f7); }
+#${KEY}-zoom[hidden] { display: none; }
+`;
+function zoomPill(browser, label, tries = 40) {
+  const am = browser?.contentWindow;
+  const doc = am?.document;
+  const header = doc?.getElementById("messageHeader");
+  const mp = doc?.getElementById("messagepane");
+  if (!header || !mp || !am.top.ZoomManager) {
+    if (tries > 0)
+      browser?.ownerGlobal?.setTimeout(() => zoomPill(browser, label, tries - 1), 250);
+    return;
+  }
+  if (zoomPills.has(am))
+    return;
+  const zm = am.top.ZoomManager;
+  const style = doc.createElement("style");
+  style.textContent = ZOOM_CSS;
+  (doc.head ?? doc.documentElement).append(style);
+  const pill = doc.createElement("button");
+  pill.id = `${KEY}-zoom`;
+  pill.title = label ?? "Actual Size";
+  const percent = new Intl.NumberFormat(Services.locale.appLocaleAsBCP47, { style: "percent" });
+  const update = () => {
+    const z = zm.getZoomForBrowser(mp);
+    pill.hidden = Math.round(z * 100) === 100;
+    pill.textContent = percent.format(z);
+  };
+  pill.addEventListener("click", () => zm.reset(mp));
+  header.append(pill);
+  am.addEventListener("FullZoomChange", update, true);
+  am.addEventListener("TextZoomChange", update, true);
+  update();
+  am.addEventListener("unload", () => zoomPills.delete(am), { once: true });
+  zoomPills.set(am, () => {
+    am.removeEventListener("FullZoomChange", update, true);
+    am.removeEventListener("TextZoomChange", update, true);
+    pill.remove();
+    style.remove();
+    zoomPills.delete(am);
+  });
+}
+
+const pinchWindows = new Map();
+function pinchZoom(win, on) {
+  if (!on) {
+    pinchWindows.get(win)?.();
+    pinchWindows.delete(win);
+    return;
+  }
+  if (pinchWindows.has(win))
+    return;
+  const steps = [];
+  let gesture = null;   // { browser, start: zoom at the start, sum: of the details, last: time }
+  const zoom = (browser, detail) => {
+    const zm = win.ZoomManager;   // Thunderbird's, also for its "Zoom Text Only"
+    if (!zm)
+      return;
+    const now = Date.now();
+    if (gesture?.browser !== browser || now - gesture.last > 300)   // updates come every ~10 ms during a pinch
+      gesture = { browser, start: zm.getZoomForBrowser(browser), sum: 0 };
+    gesture.last = now;
+    gesture.sum += detail;
+    const z = gesture.start * (1 - gesture.sum / (100 * win.devicePixelRatio));
+    zm.setZoomForBrowser(browser, Math.min(zm.MAX, Math.max(zm.MIN, z)));
+  };
+  const step = e => {
+    if (!e.ctrlKey || e.axis !== e.VERTICAL_AXIS || !e.detail)
+      return;
+    // the message, or a frame in it (ownerGlobal is undefined on these nodes here)
+    let bc = e.target.ownerDocument?.defaultView?.browsingContext;
+    while (bc && bc.embedderElement?.id !== "messagepane")
+      bc = bc.parent;
+    const browser = bc?.embedderElement;
+    if (!browser)
+      return;
+    const s = { browser, detail: e.detail, gecko: false };
+    steps.push(s);
+    // twice: the first runs before Gecko's zoom event (posted after this listener), the second after it
+    Services.tm.dispatchToMainThread(() => Services.tm.dispatchToMainThread(() => {
+      steps.splice(steps.indexOf(s), 1);
+      if (!s.gecko)
+        zoom(s.browser, s.detail);
+    }));
+  };
+  const geckoZoom = () => {
+    const s = steps.find(x => !x.gecko);
+    if (s)
+      s.gecko = true;
+  };
+  win.addEventListener("DOMMouseScroll", step, true);
+  win.addEventListener("DoZoomEnlarge", geckoZoom, true);
+  win.addEventListener("DoZoomReduce", geckoZoom, true);
+  win.addEventListener("unload", () => pinchWindows.delete(win), { once: true });
+  pinchWindows.set(win, () => {
+    win.removeEventListener("DOMMouseScroll", step, true);
+    win.removeEventListener("DoZoomEnlarge", geckoZoom, true);
+    win.removeEventListener("DoZoomReduce", geckoZoom, true);
+  });
 }
 function messageWindows(on) {
   if (on) {
@@ -520,6 +645,7 @@ function setup(w, labels) {
       flagged = on;
       showFlag();
     });
+    zoomPill(w.messageBrowser, labels.zoomReset);
   }, 0);
   const placeSoon = () => {
     showFlag();
@@ -579,6 +705,7 @@ function setup(w, labels) {
       top.removeEventListener("resize", place);
       top.removeEventListener("TabSelect", placeSoon);
       flagObserver?.disconnect();
+      zoomPills.get(w.messageBrowser?.contentWindow)?.();
       top.document.documentElement.removeAttribute(`${KEY}-flagged`);
       top.document.documentElement.removeAttribute(`${KEY}-mail`);
       for (const v of ["sidebar-end", "toolbar-shift"])
@@ -610,6 +737,10 @@ var quickActions = class extends ExtensionCommon.ExtensionAPI {
     for (const w of windows)
       w[KEY]?.remove();
     windows.clear();
+    for (const win of [...pinchWindows.keys()])
+      pinchZoom(win, false);
+    for (const remove of [...zoomPills.values()])
+      remove();
     icons(false);
     if (windowLabels)
       messageWindows(false);
@@ -643,6 +774,7 @@ var quickActions = class extends ExtensionCommon.ExtensionAPI {
             return;
           if (w.document.readyState !== "complete")
             await new Promise(r => w.addEventListener("load", r, { once: true }));
+          pinchZoom(w.browsingContext.topChromeWindow, true);
           if (w[KEY] || !w.document.getElementById("threadTree"))
             return;
           w[KEY] = setup(w, labels);
