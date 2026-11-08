@@ -64,12 +64,15 @@ icon_set() {   # icon_set add|del
 # Windows Thunderbird does not draw itself (a message opened on its own, a new mail) get their title bar from GTK and
 # its theme. The snap cannot read ~/.themes, so they showed Adwaita's buttons (x - []); MacTahoe's GTK 3 theme is
 # copied into the snap's own home (~/snap/thunderbird/common/.themes, kept across snap updates), marked .mbp115-mail.
+# Both names get MacTahoe-Light's files, which hold both variants: with Thunderbird on Light and the desktop on Dark,
+# Gecko needs a light variant of the desktop's theme or it falls back to Adwaita, and MacTahoe-Dark has none.
 SNAPTHEMES=$HOME/snap/thunderbird/common/.themes
-gtk_themes() { [ -d "${SNAPTHEMES%/.themes}" ] && ls -d "$HOME"/.themes/MacTahoe-Light "$HOME"/.themes/MacTahoe-Dark 2>/dev/null; }
+GTKSRC=$HOME/.themes/MacTahoe-Light/gtk-3.0
+gtk_themes() { [ -d "${SNAPTHEMES%/.themes}" ] && [ -f "$GTKSRC/gtk.css" ] && ls -d "$HOME"/.themes/MacTahoe-Light "$HOME"/.themes/MacTahoe-Dark 2>/dev/null; }
 gtk_ok() {
     local t
     for t in $(gtk_themes); do
-        diff -rq "$t/gtk-3.0" "$SNAPTHEMES/${t##*/}/gtk-3.0" >/dev/null 2>&1 || return 1
+        diff -rq "$GTKSRC" "$SNAPTHEMES/${t##*/}/gtk-3.0" >/dev/null 2>&1 || return 1
     done
 }
 gtk_set() {   # gtk_set add|del
@@ -78,7 +81,7 @@ gtk_set() {   # gtk_set add|del
         for t in $(gtk_themes); do
             [ -e "$SNAPTHEMES/${t##*/}" ] && [ ! -e "$SNAPTHEMES/${t##*/}/.mbp115-mail" ] && continue   # the user's own copy
             rm -rf "$SNAPTHEMES/${t##*/}" && mkdir -p "$SNAPTHEMES/${t##*/}" \
-                && cp -r "$t/gtk-3.0" "$t/index.theme" "$SNAPTHEMES/${t##*/}/" && touch "$SNAPTHEMES/${t##*/}/.mbp115-mail"
+                && cp -r "$GTKSRC" "$t/index.theme" "$SNAPTHEMES/${t##*/}/" && touch "$SNAPTHEMES/${t##*/}/.mbp115-mail"
         done
     else
         for t in "$SNAPTHEMES"/*/; do

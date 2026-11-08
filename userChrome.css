@@ -746,6 +746,22 @@ menupopup > :is(menu, menuitem):not([disabled])[_moz-menuactive] {
   background-color: var(--mail-accent, AccentColor) !important;
   color: var(--mail-accent-text, AccentColorText) !important;
 }
+/* the suggestions under an address field: the same look */
+panel[type="autocomplete-richlistbox"] {
+  --panel-border-radius: 12px !important;
+  --panel-padding: 5px !important;
+  --panel-background-color: light-dark(#ffffff, #2c2c2e) !important;
+  --panel-border-color: light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .12)) !important;
+  --panel-text-color: light-dark(#1d1d1f, #f5f5f7) !important;
+  & .autocomplete-richlistitem {
+    border-radius: 6px !important;
+    padding-block: 3px !important;
+    &[selected] {
+      background-color: var(--mail-accent, AccentColor) !important;
+      color: var(--mail-accent-text, AccentColorText) !important;
+    }
+  }
+}
 #mailContext-navigation > .menuitem-iconic > .menu-icon {
   inline-size: 20px !important;
   block-size: 20px !important;

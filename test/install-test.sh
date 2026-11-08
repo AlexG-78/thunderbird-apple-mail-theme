@@ -15,6 +15,7 @@ echo '{"chrome://messenger/content/messenger.xhtml":{"folderTree":{"mode":"all",
 printf '/* my own rule */\n#folderPane { color: red; }' > "$P/chrome/userChrome.css"   # no newline at the end
 mkdir -p "$HOME/.themes/MacTahoe-Light/gtk-3.0/assets" "$HOME/snap/thunderbird/common"   # MacTahoe's GTK theme for the snap
 echo '/* theme */' > "$HOME/.themes/MacTahoe-Light/gtk-3.0/gtk.css"; touch "$HOME/.themes/MacTahoe-Light/index.theme"
+mkdir -p "$HOME/.themes/MacTahoe-Dark/gtk-3.0"; echo '/* dark only */' > "$HOME/.themes/MacTahoe-Dark/gtk-3.0/gtk.css"; touch "$HOME/.themes/MacTahoe-Dark/index.theme"
 
 n=0 fail=0
 check() { n=$((n + 1)); if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=$((fail + 1)); fi; }
@@ -42,6 +43,7 @@ check "install: layout written, other window data kept" '[ "$(xul folderTree mod
 check "install: add-on in the profile" '[ -s "$P/extensions/mbp115-quick-actions@alexg-78.xpi" ] && python3 -I "$here/../profile.py" addon same "$P"'
 check "install: backup saved" '[ -s "$XDG_CONFIG_HOME/mbp115/mail.backup.json" ]'
 check "install: GTK theme copied for the snap" '[ -s "$HOME/snap/thunderbird/common/.themes/MacTahoe-Light/gtk-3.0/gtk.css" ] && [ -e "$HOME/snap/thunderbird/common/.themes/MacTahoe-Light/.mbp115-mail" ]'
+check "install: the snap's MacTahoe-Dark has the light variant too" 'cmp -s "$HOME/snap/thunderbird/common/.themes/MacTahoe-Dark/gtk-3.0/gtk.css" "$HOME/.themes/MacTahoe-Light/gtk-3.0/gtk.css"'
 check "install: sender names formatted again" '[ "$(pref mail.displayname.version)" = 1 ]'
 
 # the user changes two settings in Thunderbird afterwards
