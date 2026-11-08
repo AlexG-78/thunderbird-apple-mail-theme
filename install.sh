@@ -12,6 +12,8 @@
 # MBP115_MAIL_PROFILE=<dir> works on that profile instead (tests: no check for a running Thunderbird).
 set -uo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
+# shellcheck source=../answer.sh
+. "$here/../answer.sh"
 CONF=${XDG_CONFIG_HOME:-$HOME/.config}/mbp115
 BACKUP=$CONF/mail.backup.json
 [ "$(id -u)" -ne 0 ] || { echo "Run without sudo (this is your Thunderbird profile)"; exit 1; }
@@ -135,11 +137,16 @@ case ${1:-install} in
     echo "        toolbar actions over the message; the kit's line icons in place of Thunderbird's own everywhere.
         Nothing is loaded from the internet; each part can be switched off"
     echo "   Thunderbird's own settings can change each of these later. Undo: bash tools/mail/install.sh remove"
-    [ -t 0 ] || { echo "Not asking without a terminal - nothing changed."; exit 3; }
-    read -r -p "   Apply these changes? [Y/n] " a
-    [[ ${a:-y} =~ ^[YyJj] ]] || { echo "Nothing changed."; exit 3; }
-    while running; do read -r -p "   Please quit Thunderbird first, then press Enter (or type q to stop) " a && [ "$a" != q ] \
-        || { echo "Nothing changed."; exit 3; }; done
+    if ! answered; then   # with --answers the user chose it in MacBook Pro Setup
+        [ -t 0 ] || { echo "Not asking without a terminal - nothing changed."; exit 3; }
+        read -r -p "   Apply these changes? [Y/n] " a
+        [[ ${a:-y} =~ ^[YyJj] ]] || { echo "Nothing changed."; exit 3; }
+    fi
+    while running; do
+        [ -t 0 ] || { echo "Thunderbird is running: quit it, then run this step again. Nothing changed."; exit 3; }
+        read -r -p "   Please quit Thunderbird first, then press Enter (or type q to stop) " a && [ "$a" != q ] \
+            || { echo "Nothing changed."; exit 3; }
+    done
     python3 -I "$here/profile.py" apply "$prof" "$BACKUP" || { echo "The settings could not be written."; exit 1; }
     css_block add
     css_block add "$ucss" "$here/userContent.css"
