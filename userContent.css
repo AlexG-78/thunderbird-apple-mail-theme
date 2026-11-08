@@ -21,6 +21,7 @@
     background: var(--mail-sidebar) !important;
   }
   #cards {
+    background: var(--mail-bg) !important;
     border: none !important;
   }
   tr[is="ab-card-row"] td > .card-container {

@@ -145,7 +145,9 @@ def main():
     if cmd == "addon":
         return addon(sys.argv[2], sys.argv[3])
     prof, backup_path = Profile(sys.argv[2]), sys.argv[3]
-    backup = json.load(open(backup_path)) if os.path.exists(backup_path) else {"profile": prof.path, "keys": {}}
+    backup = json.load(open(backup_path)) if os.path.exists(backup_path) else {}
+    if backup.get("profile") != prof.path:   # the saved values are another profile's (a new or reinstalled Thunderbird)
+        backup = {"profile": prof.path, "keys": {}}
     saved = backup["keys"]   # key -> {"orig": value or None, "kit": value written}
     kit = kit_values()
     if cmd == "status":
@@ -163,10 +165,11 @@ def main():
                 saved[k] = {"orig": cur, "kit": v}
             if cur != v:
                 changes[k] = v
-        prof.save(changes, names=not backup.get("names"))   # installs before this fix kept the old names
+        names = not backup.get("names")   # installs before this fix kept the old names
         backup["names"] = 1
         os.makedirs(os.path.dirname(backup_path), exist_ok=True)
-        atomic(backup_path, json.dumps(backup, indent=1))
+        atomic(backup_path, json.dumps(backup, indent=1))   # first: changed settings without a record could never be restored
+        prof.save(changes, names=names)
         return 0
     if cmd == "revert":
         changes = {k: s["orig"] for k, s in saved.items() if prof.get(k) == s["kit"] and s["orig"] != s["kit"]}

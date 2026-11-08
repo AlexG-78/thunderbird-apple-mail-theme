@@ -3,7 +3,7 @@
     "message": "Mail Quick Actions"
   },
   "description": {
-    "message": "Apple Mail's message list: buttons on the message under the pointer (read or unread, flag, archive, delete), conversations, contact pictures (mbp115 kit)."
+    "message": "Message list with hover buttons (read or unread, flag, archive, delete), conversations, contact pictures."
   },
   "read": {
     "message": "Mark as Read"
@@ -23,20 +23,17 @@
   "delete": {
     "message": "Delete"
   },
-  "optHint": {
-    "message": "Thunderbird's own view settings still work; this switches a folder shown without threads back to threads."
-  },
   "optThreads": {
-    "message": "Group messages by conversation (every folder shows threads, collapsed)"
+    "message": "Group messages by conversation"
   },
   "optPictures": {
-    "message": "Show contact pictures next to messages (from the address book, else the initials)"
+    "message": "Show contact pictures next to messages"
   },
   "optPreview": {
-    "message": "Show two lines of each message under its subject (read from the messages stored on this computer)"
+    "message": "Show two lines of each message under its subject"
   },
   "optBackspace": {
-    "message": "Backspace deletes the selected message (in the message list; Ctrl+Z brings it back)"
+    "message": "Backspace deletes the selected message"
   },
   "reply": {
     "message": "Reply"
@@ -50,8 +47,12 @@
   "junk": {
     "message": "Junk"
   },
-  "format": { "message": "Format" },
-  "newMessage": { "message": "New Message" },
+  "format": {
+    "message": "Format"
+  },
+  "newMessage": {
+    "message": "New Message"
+  },
   "zoomReset": {
     "message": "Actual Size"
   }

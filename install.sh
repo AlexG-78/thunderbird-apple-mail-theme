@@ -72,6 +72,7 @@ gtk_themes() { [ -d "${SNAPTHEMES%/.themes}" ] && [ -f "$GTKSRC/gtk.css" ] && ls
 gtk_ok() {
     local t
     for t in $(gtk_themes); do
+        [ -e "$SNAPTHEMES/${t##*/}" ] && [ ! -e "$SNAPTHEMES/${t##*/}/.mbp115-mail" ] && continue   # the user's own copy
         diff -rq "$GTKSRC" "$SNAPTHEMES/${t##*/}/gtk-3.0" >/dev/null 2>&1 || return 1
     done
 }
@@ -80,7 +81,7 @@ gtk_set() {   # gtk_set add|del
     if [ "$1" = add ]; then
         for t in $(gtk_themes); do
             [ -e "$SNAPTHEMES/${t##*/}" ] && [ ! -e "$SNAPTHEMES/${t##*/}/.mbp115-mail" ] && continue   # the user's own copy
-            rm -rf "$SNAPTHEMES/${t##*/}" && mkdir -p "$SNAPTHEMES/${t##*/}" \
+            rm -rf "${SNAPTHEMES:?}/${t##*/}" && mkdir -p "$SNAPTHEMES/${t##*/}" \
                 && cp -r "$GTKSRC" "$t/index.theme" "$SNAPTHEMES/${t##*/}/" && touch "$SNAPTHEMES/${t##*/}/.mbp115-mail"
         done
     else
@@ -100,7 +101,8 @@ running() {   # Thunderbird writes prefs.js and xulstore.json when it quits: cha
 }
 css_block() {   # css_block add|del [profile file] [kit file]
     local f=${2:-$css} src=${3:-$here/userChrome.css}
-    [ -f "$f" ] && sed -i '\|^/\* mbp115-mail begin|,\|^/\* mbp115-mail end|d' "$f"
+    # only with both markers: without its end, sed would delete to the end of the file
+    [ -f "$f" ] && grep -q '^/\* mbp115-mail end' "$f" && sed -i '\|^/\* mbp115-mail begin|,\|^/\* mbp115-mail end|d' "$f"
     if [ "$1" = add ]; then
         mkdir -p "${f%/*}"
         [ -s "$f" ] && [ -n "$(tail -c1 "$f")" ] && echo >> "$f"   # the marker must start a line
@@ -171,7 +173,7 @@ case ${1:-install} in
     python3 -I "$here/profile.py" addon remove "$prof"
     icon_set del
     gtk_set del
-    [ -f "$BACKUP" ] && python3 -I "$here/profile.py" revert "$prof" "$BACKUP"
+    if [ -f "$BACKUP" ]; then python3 -I "$here/profile.py" revert "$prof" "$BACKUP" || { echo "Thunderbird's settings could not be restored."; exit 1; }; fi
     echo "Thunderbird looks and works as before (settings you changed since are kept)."
     ;;
   status) off && exit 0; [ -n "$prof" ] || exit 4; applied ;;

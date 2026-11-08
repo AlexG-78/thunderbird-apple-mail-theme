@@ -3,7 +3,7 @@
     "message": "Mail-Schnellaktionen"
   },
   "description": {
-    "message": "Die Nachrichtenliste von Apples Mail: Knöpfe an der Nachricht unter dem Zeiger (gelesen oder ungelesen, markieren, archivieren, löschen), Konversationen, Kontaktbilder (mbp115-Kit)."
+    "message": "Nachrichtenliste mit Schaltflächen unter dem Zeiger (gelesen oder ungelesen, Markierung, Archiv, Löschen), Unterhaltungen, Kontaktbilder."
   },
   "read": {
     "message": "Als gelesen markieren"
@@ -23,20 +23,17 @@
   "delete": {
     "message": "Löschen"
   },
-  "optHint": {
-    "message": "Thunderbirds eigene Ansicht-Einstellungen gehen weiter; dies schaltet einen Ordner ohne Threads wieder auf Threads."
-  },
   "optThreads": {
-    "message": "Nachrichten nach Konversation gruppieren (jeder Ordner zeigt Threads, eingeklappt)"
+    "message": "Nachrichten nach Unterhaltung gruppieren"
   },
   "optPictures": {
-    "message": "Kontaktbilder neben den Nachrichten zeigen (aus dem Adressbuch, sonst die Initialen)"
+    "message": "Kontaktbilder neben den Nachrichten zeigen"
   },
   "optPreview": {
-    "message": "Zwei Zeilen jeder Nachricht unter dem Betreff zeigen (aus den auf diesem Computer gespeicherten Nachrichten)"
+    "message": "Zwei Zeilen jeder Nachricht unter dem Betreff zeigen"
   },
   "optBackspace": {
-    "message": "Rücktaste löscht die ausgewählte Nachricht (in der Nachrichtenliste; Strg+Z holt sie zurück)"
+    "message": "Rücktaste löscht die ausgewählte Nachricht"
   },
   "reply": {
     "message": "Antworten"
@@ -50,8 +47,12 @@
   "junk": {
     "message": "Werbung"
   },
-  "format": { "message": "Formatieren" },
-  "newMessage": { "message": "Neue E-Mail" },
+  "format": {
+    "message": "Formatieren"
+  },
+  "newMessage": {
+    "message": "Neue E-Mail"
+  },
   "zoomReset": {
     "message": "Originalgröße"
   }
