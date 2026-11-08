@@ -10,3 +10,5 @@ user_pref("mail.fixed_width_messages", false);
 user_pref("mail.ui.display.dateformat.thisweek", 4);
 // a double-clicked message opens in a new window, as in Mail
 user_pref("mail.openMessageBehavior", 0);
+// no progress window while sending, Mail has none; the status line shows it and errors still come as a dialog
+user_pref("mailnews.show_send_progress", false);

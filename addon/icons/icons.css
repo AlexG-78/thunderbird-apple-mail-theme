@@ -19,6 +19,7 @@
   --icon-print: url("resource://mbp115mail/icons/print.svg") !important;
   --icon-search: url("resource://mbp115mail/icons/search.svg") !important;
   --icon-lock: url("resource://mbp115mail/icons/lock.svg") !important;
+  --icon-lock-disabled: url("resource://mbp115mail/icons/lock-open.svg") !important;
   --icon-spelling: url("resource://mbp115mail/icons/spelling.svg") !important;
   --icon-archive: url("resource://mbp115mail/icons/archive.svg") !important;
   --icon-spam: url("resource://mbp115mail/icons/spam.svg") !important;

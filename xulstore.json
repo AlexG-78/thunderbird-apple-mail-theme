@@ -22,6 +22,12 @@
   "chrome://messenger/content/messengercompose/messengercompose.xhtml": {
     "compose-toolbar-menubar2": {
       "autohide": "true"
+    },
+    "FormatToolbar": {
+      "hidden": "true"
+    },
+    "menu_showFormatToolbar": {
+      "checked": "false"
     }
   },
   "chrome://messenger/content/messageWindow.xhtml": {

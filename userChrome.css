@@ -812,42 +812,86 @@ menupopup > :is(menu, menuitem):not([disabled])[_moz-menuactive] {
   display: none !important;
 }
 
-/* --- compose window like Mail's: Send as a round accent button first, the other actions as icons, From / To /
- * Subject as plain rows with hairlines instead of boxed fields, the formatting bar flat */
+/* --- compose window like Mail 26's: Send in an accent capsule, the other actions in capsules as in the main window,
+ * To / Cc / Subject / From as plain rows with hairlines (From last), no formatting bar until Aa, attachments as quiet
+ * tiles */
 #compose-toolbox,
 #MsgHeadersToolbar {
   background: var(--mail-bg) !important;
   border: none !important;
 }
 #composeToolbar2 {
-  padding: 6px 10px !important;
+  --mail-capsule: light-dark(#ffffff, #3a3a3c);
+  --mail-capsule-line: light-dark(rgba(0, 0, 0, .1), rgba(255, 255, 255, .12));
+  padding: 8px 12px !important;
   border: none !important;
-  & .toolbarbutton-text {
-    display: none !important;
-  }
-  & toolbarbutton {
-    border-radius: 8px !important;
-  }
-  & .toolbarbutton-icon {
-    inline-size: 20px !important;
-    block-size: 20px !important;
-  }
+  & .toolbarbutton-text,
   & toolbarseparator {
     display: none !important;
+  }
+  & .toolbarbutton-icon {
+    inline-size: 28px !important;   /* as big as the main window's */
+    block-size: 28px !important;
+  }
+  & .toolbarbutton-1:not(#button-send) {
+    background: var(--mail-capsule) !important;
+    border: 1px solid var(--mail-capsule-line) !important;
+    border-inline-width: 0 !important;
+    border-radius: 0 !important;
+    padding: 2px 4px !important;
+    margin: 0 !important;
+  }
+  /* the ends of the two groups: after Send up to Contacts, and Aa, Attach */
+  & .toolbarbutton-1:nth-child(1 of .toolbarbutton-1:not(#button-send, [hidden])),
+  & .toolbarbutton-1#mbp115QuickActions-format {
+    border-inline-start-width: 1px !important;
+    border-start-start-radius: 19px !important;
+    border-end-start-radius: 19px !important;
+    padding-inline-start: 8px !important;
+  }
+  & .toolbarbutton-1:is(#button-contacts, #button-attach) {
+    border-inline-end-width: 1px !important;
+    border-start-end-radius: 19px !important;
+    border-end-end-radius: 19px !important;
+    padding-inline-end: 8px !important;
   }
 }
 #button-send {
   background: var(--mail-accent) !important;
   color: var(--mail-accent-text) !important;
-  border-radius: 16px !important;
-  padding: 4px 14px !important;
-  margin-inline-end: 8px !important;
+  border: none !important;
+  border-radius: 19px !important;
+  padding: 3px 16px !important;
+  margin: 0 10px 0 0 !important;
   &[disabled] {
     opacity: .45 !important;
   }
 }
+/* Aa is text in the capsule, the height of its neighbours' icons; only where Thunderbird offers the formatting bar */
+#mbp115QuickActions-format {
+  & .toolbarbutton-icon {
+    display: none !important;
+  }
+  & .toolbarbutton-text {
+    display: flex !important;
+    align-items: center;
+    min-block-size: 28px;
+    font-size: 15px;
+    padding-inline: 4px;
+  }
+  :root:has(#menu_showFormatToolbar[hidden]) & {
+    display: none !important;   /* plain text mail */
+  }
+  :root:has(#FormatToolbar:not([hidden])) & {
+    color: var(--mail-accent) !important;
+  }
+}
 #MsgHeadersToolbar {
-  padding: 2px 16px 0 !important;
+  grid-template-rows: minmax(0, min-content) min-content min-content !important;   /* the recipients, first now, scroll */
+  padding: 0 16px !important;
+}
+#top-gradient-box {
+  order: 1;
 }
 #top-gradient-box,
 #recipientsContainer .address-row:not(.hidden),
@@ -864,6 +908,23 @@ menupopup > :is(menu, menuitem):not([disabled])[_moz-menuactive] {
 :is(#identityLabel, #subjectLabel, .address-label-container label) {
   color: var(--mail-text-2) !important;
   font-weight: 400 !important;
+  & .accesskey {
+    text-decoration: none !important;
+  }
+  &::after {
+    content: ":";
+  }
+}
+.address-pill:not([selected]) {
+  background: color-mix(in srgb, var(--mail-accent) 14%, transparent) !important;
+  border-color: transparent !important;
+  color: var(--mail-text) !important;
+}
+.address-pill {
+  border-radius: 10px !important;
+}
+#msgcomposeWindow #status-bar {
+  border: none !important;
 }
 #compose-toolbar-menubar2[inactive] {
   display: none !important;   /* the menu bar shows while Alt is held, as Thunderbird's autohide does */
@@ -873,10 +934,102 @@ menupopup > :is(menu, menuitem):not([disabled])[_moz-menuactive] {
   border: none !important;
 }
 #FormatToolbar {
-  background: transparent !important;
+  background: var(--mail-bg) !important;
   border: none !important;
   border-block-end: 1px solid var(--mail-line) !important;
-  padding-inline: 12px !important;
+  padding: 3px 12px !important;
+  & menulist {
+    appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 8px !important;
+  }
+  & :is(menulist, toolbarbutton):hover {
+    background: var(--mail-hover) !important;
+  }
+  & toolbarbutton {
+    border: none !important;
+    border-radius: 8px !important;
+  }
+}
+#attachmentArea {
+  background: var(--mail-bg) !important;
+  border: none !important;
+  border-block-start: 1px solid var(--mail-line) !important;
+  & > summary {
+    background: transparent !important;
+    color: var(--mail-text-2) !important;
+    padding: 6px 16px !important;
+  }
+}
+#attachmentBucketSize {
+  background: none !important;
+  color: var(--mail-text-2) !important;
+  font-size: inherit !important;
+  font-weight: 400 !important;
+  padding: 0 !important;
+}
+#attachment-splitter {
+  border: none !important;
+}
+#attachmentBucket {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 12px 8px !important;
+  & .attachmentItem {
+    background: var(--mail-sidebar) !important;
+    border: none !important;
+    border-radius: 9px !important;
+    color: var(--mail-text) !important;
+    margin: 2px 3px !important;
+    outline: none !important;
+    padding: 5px 10px !important;
+    &[selected] {
+      background: color-mix(in srgb, var(--mail-accent) 18%, transparent) !important;
+      & .attachmentcell-size {
+        color: var(--mail-text-2) !important;
+      }
+    }
+  }
+}
+
+/* --- alerts and questions like macOS 26's: the app's icon above centred text, capsule buttons side by side. The
+ * buttons live in the dialog's shadow root: user sheets reach them there, but not through a selector from outside */
+#commonDialogWindow {
+  min-width: 24em !important;
+  background: var(--mail-bg) !important;
+  & :is(#iconContainer, #infoContainer) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    text-align: center;
+  }
+  & #infoIcon {
+    content: url("chrome://branding/content/icon64.png") !important;
+    inline-size: 56px !important;
+    block-size: 56px !important;
+    margin-block-end: 8px;
+  }
+  & #checkboxContainer > :first-child {
+    display: none;
+  }
+  & #checkboxContainer > :last-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+}
+.dialog-button-box button {
+  min-inline-size: 96px;
+  min-block-size: 30px;
+  appearance: none !important;
+  background: light-dark(#e9e9ed, #3a3a3c) !important;
+  border: none !important;
+  border-radius: 15px !important;
+  color: var(--mail-text) !important;
+  outline: none !important;
+  &[default] {
+    background: var(--mail-accent) !important;
+    color: var(--mail-accent-text) !important;
+  }
 }
 
 /* --- Calendar like macOS Calendar: events as a light tint of their calendar's colour with a bar on the left, today

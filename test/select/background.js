@@ -13,6 +13,14 @@ async function retry(what, f) {   // the account's folders and the mail tab are 
         await sleep(500);
     }
 }
+// every compose window of the test: a recipient, a subject and two made-up attachments
+messenger.tabs.onCreated.addListener(async tab => {
+    if (tab.type !== 'messageCompose')
+        return;
+    await messenger.compose.setComposeDetails(tab.id, {to: ['anna@example.org'], subject: 'Photos from the trip'});
+    for (const [name, size] of [['Itinerary.pdf', 240000], ['Packing list.txt', 900]])
+        await messenger.compose.addAttachment(tab.id, {file: new File(['x'.repeat(size)], name)});
+});
 // made-up contacts in the personal address book (once per profile)
 const PEOPLE = [["Anna", "Klein", "anna@example.org", "+49 30 1234567", "Example Ltd."], ["Jonas", "Weber", "jonas@example.net", "+49 170 7654321", ""],
     ["Lena", "Hoffmann", "lena@example.org", "", ""], ["Mia", "Schulz", "mia@example.org", "+49 89 555123", ""],

@@ -50,6 +50,8 @@
   "junk": {
     "message": "Junk"
   },
+  "format": { "message": "Format" },
+  "newMessage": { "message": "New Message" },
   "zoomReset": {
     "message": "Actual Size"
   }

@@ -3,6 +3,7 @@
 # GNOME Shell 51 on a virtual monitor; one screenshot per style in out/ (light.png, dark.png).
 #   run.sh [userChrome.css]   default: the kit's ../userChrome.css; "none" shows Thunderbird as it comes
 #   MAIL_TEST_XPI="a.xpi b.xpi"   add-ons to install too (files named <add-on id>.xpi)
+#   MAIL_TEST_SMTP=1   a mail server on 127.0.0.1:2525 that takes each message after 3 s
 #   MAIL_TEST_POINTER="x,y x,y,click x,y,key:Control_L+z"   move the pointer (and click or press keys) after the
 #     first shot: <style>-1.png, -2.png, ...
 # Uses the snap's Thunderbird binary without the snap (the snap cannot reach the temporary dirs). Changes nothing
@@ -41,6 +42,13 @@ user_pref("mail.server.server1.name", "Personal");
 user_pref("mail.server.server1.userName", "me");
 user_pref("mail.server.server1.directory-rel", "[ProfD]Mail/pop.example.invalid");
 user_pref("mail.server.server1.login_at_startup", false);
+user_pref("mail.smtpservers", "smtp1");
+user_pref("mail.smtp.defaultserver", "smtp1");
+user_pref("mail.smtpserver.smtp1.hostname", "127.0.0.1");
+user_pref("mail.smtpserver.smtp1.port", 2525);
+user_pref("mail.smtpserver.smtp1.authMethod", 1);
+user_pref("mail.smtpserver.smtp1.try_ssl", 0);
+user_pref("mail.identity.id1.smtpServer", "smtp1");
 user_pref("mail.server.server1.check_new_mail", false);
 user_pref("mail.server.server2.type", "none");
 user_pref("mail.server.server2.hostname", "Local Folders");
@@ -73,6 +81,18 @@ EOF
     (cd "$here/../addon" && zip -qr "$p/extensions/mbp115-quick-actions@alexg-78.xpi" .)   # Mail Quick Actions
 }
 
+[ -n "${MAIL_TEST_SMTP:-}" ] && { timeout 200 python3 -Ic "
+import socket, time
+s = socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1); s.bind(('127.0.0.1', 2525)); s.listen()
+while True:
+    c, _ = s.accept(); f = c.makefile('rwb', buffering=0); f.write(b'220 test\\r\\n'); body = False
+    for l in f:
+        if body:
+            if l == b'.\\r\\n': time.sleep(3); f.write(b'250 ok\\r\\n'); body = False
+        elif l[:4].upper() == b'DATA': body = True; f.write(b'354 go\\r\\n')
+        elif l[:4].upper() == b'QUIT': f.write(b'221 bye\\r\\n'); break
+        else: f.write(b'250 ok\\r\\n')
+    c.close()" >/dev/null 2>&1 & }
 ut=$(find "$HOME/.local/share/gnome-shell/extensions" -maxdepth 1 -name 'user-theme@*' 2>/dev/null | head -1)
 rc=0
 for style in ${MAIL_TEST_STYLES:-light dark}; do

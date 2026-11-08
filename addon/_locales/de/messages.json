@@ -50,6 +50,8 @@
   "junk": {
     "message": "Werbung"
   },
+  "format": { "message": "Formatieren" },
+  "newMessage": { "message": "Neue E-Mail" },
   "zoomReset": {
     "message": "Originalgröße"
   }

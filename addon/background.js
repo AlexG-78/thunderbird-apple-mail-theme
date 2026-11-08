@@ -1,5 +1,5 @@
 // Every mail tab gets the quick actions: the ones open now and the ones opened later.
-const labels = Object.fromEntries(['read', 'unread', 'flag', 'unflag', 'archive', 'delete', 'reply', 'replyAll', 'forward', 'junk', 'zoomReset']
+const labels = Object.fromEntries(['read', 'unread', 'flag', 'unflag', 'archive', 'delete', 'reply', 'replyAll', 'forward', 'junk', 'zoomReset', 'format', 'newMessage']
     .map(k => [k, messenger.i18n.getMessage(k)]));
 const attach = tab => tab.type === 'mail' && messenger.quickActions.attach(tab.id, labels).catch(console.error);
 messenger.tabs.query({}).then(tabs => tabs.forEach(attach));

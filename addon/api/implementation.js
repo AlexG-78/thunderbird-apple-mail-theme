@@ -161,6 +161,35 @@ function messageWindowRemove(win) {
     el.remove();
   pinchZoom(win, false);
 }
+// The compose window: Mail keeps the formatting bar away until Aa is pressed (Thunderbird remembers the state) and
+// names the window after the subject.
+const COMPOSE_WINDOW = "mbp115QuickActions-composeWindow";
+const composeTitles = new WeakMap();
+function composeWindowAdd(win) {
+  const doc = win.document;
+  const bar = doc.getElementById("composeToolbar2");
+  if (!bar || doc.querySelector(`[${KEY}-added]`))
+    return;
+  const item = doc.createXULElement("toolbarbutton");
+  item.id = `${KEY}-format`;
+  item.className = "toolbarbutton-1";
+  item.setAttribute("label", "Aa");
+  item.setAttribute("tooltiptext", windowLabels?.format ?? "Format");
+  item.setAttribute(`${KEY}-added`, "");
+  item.addEventListener("command", () => win.goDoCommand("cmd_showFormatToolbar"));
+  bar.insertBefore(item, bar.querySelector("#button-attach"));
+  composeTitles.set(win, win.SetComposeWindowTitle);
+  win.SetComposeWindowTitle = () => {
+    doc.title = doc.getElementById("msgSubject").value.trim() || (windowLabels?.newMessage ?? "New Message");
+  };
+  win.SetComposeWindowTitle();
+}
+function composeWindowRemove(win) {
+  win.document.querySelector(`[${KEY}-added]`)?.remove();
+  if (composeTitles.has(win))
+    win.SetComposeWindowTitle = composeTitles.get(win);
+  win.SetComposeWindowTitle?.();
+}
 
 // Pinch to zoom the message. Gecko turns a touchpad pinch into Ctrl+wheel steps but marks them as handled by its async
 // zoom, which finds nothing to zoom in Thunderbird's message pane (it is not in its own process), so nothing happened.
@@ -287,7 +316,14 @@ function messageWindows(on) {
       chromeURLs: ["chrome://messenger/content/messageWindow.xhtml"],
       onLoadWindow: messageWindowAdd,
     });
+    ExtensionSupport.registerWindowListener(COMPOSE_WINDOW, {
+      chromeURLs: ["chrome://messenger/content/messengercompose/messengercompose.xhtml"],
+      onLoadWindow: composeWindowAdd,
+    });
   } else {
+    ExtensionSupport.unregisterWindowListener(COMPOSE_WINDOW);
+    for (const win of Services.wm.getEnumerator("msgcompose"))
+      composeWindowRemove(win);
     ExtensionSupport.unregisterWindowListener(MESSAGE_WINDOW);
     for (const win of Services.wm.getEnumerator("mail:messageWindow"))
       messageWindowRemove(win);
