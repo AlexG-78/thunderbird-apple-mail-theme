@@ -4,20 +4,6 @@
  * xulstore.json next to this file. Only colours, sizes and spacing live here: no images.
  * userChrome.css is a user sheet: Thunderbird's own rules win over it unless a declaration is !important. */
 
-:root {
-  --mail-accent: AccentColor;
-  --mail-accent-text: AccentColorText;
-  --mail-text: light-dark(#1d1d1f, #f5f5f7);
-  --mail-text-2: light-dark(#86868b, #98989d);
-  --mail-bg: light-dark(#ffffff, #1e1e1e);
-  --mail-sidebar: light-dark(#f2f2f4, #262628);
-  --mail-line: light-dark(rgba(0, 0, 0, .09), rgba(255, 255, 255, .09));
-  --mail-hover: light-dark(rgba(0, 0, 0, .05), rgba(255, 255, 255, .06));
-  --mail-selected: light-dark(rgba(0, 0, 0, .09), rgba(255, 255, 255, .11));
-  --mail-flag: light-dark(#ff3b30, #ff453a);
-  --mail-radius: 7px;
-}
-
 /* --- main window: toolbar in the list's colour, a small search field at the end. With the kit's add-on (Mail
  * Quick Actions) it knows where the sidebar ends and the message starts: the sidebar's grey reaches the top under the
  * window buttons and the action buttons sit over the message, as in Mail. */
@@ -729,39 +715,6 @@ unified-toolbar {
 
 /* --- menus like macOS 26: rounder, the item under the pointer in the accent colour; the icon row of the message
  * menu (read, reply, archive, junk, delete) with the kit's icons */
-menupopup {
-  --panel-border-radius: 12px !important;
-  --panel-padding: 5px 0 !important;
-  --panel-background-color: light-dark(#ffffff, #2c2c2e) !important;
-  --panel-border-color: light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .12)) !important;
-  --panel-text-color: light-dark(#1d1d1f, #f5f5f7) !important;
-}
-menupopup > :is(menu, menuitem) {
-  border-radius: 6px !important;
-  min-block-size: 22px !important;
-  padding-block: 2px !important;
-  margin-inline: 5px !important;
-}
-menupopup > :is(menu, menuitem):not([disabled])[_moz-menuactive] {
-  background-color: var(--mail-accent, AccentColor) !important;
-  color: var(--mail-accent-text, AccentColorText) !important;
-}
-/* the suggestions under an address field: the same look */
-panel[type="autocomplete-richlistbox"] {
-  --panel-border-radius: 12px !important;
-  --panel-padding: 5px !important;
-  --panel-background-color: light-dark(#ffffff, #2c2c2e) !important;
-  --panel-border-color: light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .12)) !important;
-  --panel-text-color: light-dark(#1d1d1f, #f5f5f7) !important;
-  & .autocomplete-richlistitem {
-    border-radius: 6px !important;
-    padding-block: 3px !important;
-    &[selected] {
-      background-color: var(--mail-accent, AccentColor) !important;
-      color: var(--mail-accent-text, AccentColorText) !important;
-    }
-  }
-}
 #mailContext-navigation > .menuitem-iconic > .menu-icon {
   inline-size: 20px !important;
   block-size: 20px !important;
@@ -1013,7 +966,6 @@ panel[type="autocomplete-richlistbox"] {
  * buttons live in the dialog's shadow root: user sheets reach them there, but not through a selector from outside */
 #commonDialogWindow {
   min-width: 24em !important;
-  background: var(--mail-bg) !important;
   & :is(#iconContainer, #infoContainer) {
     grid-column: 1 / -1;
     justify-self: center;
@@ -1033,18 +985,17 @@ panel[type="autocomplete-richlistbox"] {
     justify-self: center;
   }
 }
-.dialog-button-box button {
-  min-inline-size: 96px;
-  min-block-size: 30px;
-  appearance: none !important;
-  background: light-dark(#e9e9ed, #3a3a3c) !important;
+/* --- the tabs above the window: a rounded selection instead of a line */
+.tab-line {
+  display: none !important;
+}
+.tab-background {
+  margin-block: 4px !important;
   border: none !important;
-  border-radius: 15px !important;
-  color: var(--mail-text) !important;
-  outline: none !important;
-  &[default] {
-    background: var(--mail-accent) !important;
-    color: var(--mail-accent-text) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  &[selected] {
+    background-color: var(--mail-selected) !important;
   }
 }
 

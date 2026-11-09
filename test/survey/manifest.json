@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "mbp115 mail survey",
+  "description": "Headless test only: opens every window, popup and view of Thunderbird and measures the look.",
+  "version": "1.0",
+  "browser_specific_settings": {"gecko": {"id": "mbp115-mail-survey@alexg-78"}},
+  "background": {"scripts": ["background.js"]},
+  "experiment_apis": {
+    "mbp115Survey": {
+      "schema": "api/schema.json",
+      "parent": {"scopes": ["addon_parent"], "paths": [["mbp115Survey"]], "script": "api/implementation.js"}
+    }
+  }
+}

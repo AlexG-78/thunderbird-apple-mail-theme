@@ -1,0 +1,401 @@
+/* --- one look for the controls of every window, popup and settings page (macOS 26): capsule buttons and pop-up buttons
+ * with one accent button, rounded fields on a grey window, lists and groups as rounded cards, tabs as a segmented
+ * control. install.sh appends this file to userChrome.css (windows) and userContent.css (about: pages and the dialogs
+ * inside them); test/survey.sh opens everything and measures it. */
+@-moz-document url-prefix("chrome:"), url-prefix("about:") {
+  :root {
+    --mail-accent: AccentColor;
+    --mail-accent-text: AccentColorText;
+    --mail-text: light-dark(#1d1d1f, #f5f5f7);
+    --mail-text-2: light-dark(#86868b, #98989d);
+    --mail-bg: light-dark(#ffffff, #1e1e1e);
+    --mail-sidebar: light-dark(#f2f2f4, #262628);
+    --mail-line: light-dark(rgba(0, 0, 0, .09), rgba(255, 255, 255, .09));
+    --mail-hover: light-dark(rgba(0, 0, 0, .05), rgba(255, 255, 255, .06));
+    --mail-selected: light-dark(rgba(0, 0, 0, .09), rgba(255, 255, 255, .11));
+    --mail-flag: light-dark(#ff3b30, #ff453a);
+    --mail-radius: 7px;
+    --mail-window: light-dark(#f5f5f7, #2c2c2e);
+    --mail-control: light-dark(#e4e4e9, #48484a);
+    --mail-control-hover: light-dark(#d9d9df, #545456);
+    --mail-control-active: light-dark(#cdcdd4, #636366);
+    --mail-field: light-dark(#ffffff, #1c1c1e);
+    --mail-field-line: light-dark(rgba(0, 0, 0, .15), rgba(255, 255, 255, .15));
+    --mail-card: light-dark(#ffffff, #3a3a3c);
+  }
+
+  /* menus, panels and the suggestions under a field */
+  :is(menupopup, panel) {
+    --panel-border-radius: 12px !important;
+    --panel-background-color: light-dark(#ffffff, #2c2c2e) !important;
+    --panel-border-color: light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .12)) !important;
+    --panel-text-color: var(--mail-text) !important;
+  }
+  menupopup {
+    --panel-padding: 5px 0 !important;
+  }
+  panel[type="autocomplete-richlistbox"] {
+    --panel-padding: 5px !important;
+  }
+  menupopup > :is(menu, menuitem) {
+    border-radius: 6px !important;
+    min-block-size: 22px !important;
+    padding-block: 2px !important;
+    margin-inline: 5px !important;
+  }
+  menupopup > :is(menu, menuitem):not([disabled])[_moz-menuactive] {
+    background-color: var(--mail-accent) !important;
+    color: var(--mail-accent-text) !important;
+  }
+  .autocomplete-richlistitem {
+    border-radius: 6px !important;
+    padding-block: 3px !important;
+    &[selected] {
+      background-color: var(--mail-accent) !important;
+      color: var(--mail-accent-text) !important;
+    }
+  }
+
+  /* buttons in panels and at the end of every dialog */
+  :is(panel, .dialog-button-box, .popup-panel, notification-message, dialog[open], #chatTabPanel) button:not(.plain, .plain-button, .icon-button, .button-flat, .close-icon, .message-bar-button-close),
+  #calendar-alarm-dialog button {
+    min-block-size: 28px !important;
+    padding-block: 2px !important;
+    padding-inline: 14px !important;
+    appearance: none !important;
+    background-color: var(--mail-control) !important;
+    border: none !important;
+    border-radius: 15px !important;
+    color: var(--mail-text) !important;
+    outline: none;
+    &:hover:not([disabled]) {
+      background-color: var(--mail-control-hover) !important;
+    }
+    &:is(:hover:active, [open]):not([disabled]) {
+      background-color: var(--mail-control-active) !important;
+    }
+    &[disabled] {
+      opacity: .45;
+    }
+    &:is([default], .primary, .button-primary):not([disabled]) {
+      background-color: var(--mail-accent) !important;
+      color: var(--mail-accent-text) !important;
+    }
+    &:focus-visible {
+      outline: 2px solid var(--mail-accent);
+      outline-offset: 1px;
+    }
+  }
+  :is(panel, .popup-panel, #calendar-alarm-dialog) menulist,
+  menulist {
+    min-block-size: 28px !important;
+    padding-block: 2px !important;
+    padding-inline: 12px 8px !important;
+    appearance: none !important;
+    background-color: var(--mail-control) !important;
+    border: none !important;
+    border-radius: 15px !important;
+    color: var(--mail-text) !important;
+    &:hover:not([disabled]) {
+      background-color: var(--mail-control-hover) !important;
+    }
+    &[disabled] {
+      opacity: .45;
+    }
+  }
+  :is(panel, .popup-panel) :is(input:not([type="checkbox"], [type="radio"], [type="color"]), textarea):not([readonly], .search-input) {
+    appearance: none !important;
+    background-color: var(--mail-field) !important;
+    border: 1px solid var(--mail-field-line) !important;
+    border-radius: 8px !important;
+    color: var(--mail-text) !important;
+    &:focus {
+      border-color: transparent !important;
+      outline: 2px solid var(--mail-accent) !important;
+      outline-offset: -1px;
+    }
+  }
+  .themeableSearchBox {
+    border-radius: 8px !important;
+  }
+  input[type="color"] {
+    inline-size: 32px !important;
+    block-size: 24px !important;
+    padding: 0 !important;
+    appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 7px !important;
+    &::-moz-color-swatch {
+      border: 1px solid var(--mail-field-line);
+      border-radius: 7px;
+    }
+  }
+  /* the small month: neutral colours, no boxes */
+  calendar-minimonth {
+    --mmMainBackground: transparent !important;
+    --mmMainBorderColor: transparent !important;
+    --mmBoxBackground: transparent !important;
+    --mmBoxBorderColor: transparent !important;
+    --mmDayBackground: transparent !important;
+    --mmDayBorderColor: transparent !important;
+    --mmDayOtherBackground: transparent !important;
+    --mmDayOtherBorderColor: transparent !important;
+    --mmDayWeekColor: var(--mail-text-2) !important;
+    --mmDayColor: var(--mail-text) !important;
+    --mmDayOtherColor: var(--mail-text-2) !important;
+    --mmDayBorderRadius: 50% !important;
+  }
+  #sidePanelNewEvent, #sidePanelNewTask {
+    border-radius: 15px !important;
+  }
+  .dialogBox {
+    border-radius: 14px !important;
+  }
+  /* a message bar is quiet, as in Mail */
+  moz-message-bar, notification-message {
+    --message-bar-background-color: light-dark(#f2f2f4, #3a3a3c) !important;
+    --message-bar-border-color: transparent !important;
+    --message-bar-text-color: var(--mail-text) !important;
+    --message-bar-icon-color: var(--mail-text-2) !important;
+    background: light-dark(#f2f2f4, #3a3a3c) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    color: var(--mail-text) !important;
+  }
+}
+
+/* --- dialogs and settings pages: not the main windows, which have their own look */
+@-moz-document regexp("^(about:(?!3pane|message|blank|srcdoc)|chrome:(?!//messenger/content/(?:messenger|messageWindow|about3Pane|aboutMessage|messengercompose/messengercompose)\\.xhtml)).*") {
+  :root {
+    --button-border-radius: 15px !important;
+    --button-background-color: var(--mail-control) !important;
+    --button-background-color-hover: var(--mail-control-hover) !important;
+    --button-background-color-active: var(--mail-control-active) !important;
+    --button-background-color-primary: var(--mail-accent) !important;
+    --button-background-color-primary-hover: color-mix(in srgb, var(--mail-accent) 88%, black) !important;
+    --button-background-color-primary-active: color-mix(in srgb, var(--mail-accent) 78%, black) !important;
+    --button-text-color: var(--mail-text) !important;
+    --button-text-color-primary: var(--mail-accent-text) !important;
+    --button-border-color: transparent !important;
+    --button-border-color-hover: transparent !important;
+    --button-border-color-active: transparent !important;
+    --button-border-color-primary: transparent !important;
+    --button-min-height: 28px !important;
+    --input-border-radius: 8px !important;
+    --input-border-color: var(--mail-field-line) !important;
+    --input-background-color: var(--mail-field) !important;
+    --focus-outline-color: var(--mail-accent) !important;
+    --color-accent-primary: var(--mail-accent) !important;
+    --color-accent-primary-hover: color-mix(in srgb, var(--mail-accent) 88%, black) !important;
+    --color-accent-primary-active: color-mix(in srgb, var(--mail-accent) 78%, black) !important;
+    --select-border-radius: 15px !important;
+    --tree-view-bg: var(--mail-field) !important;
+    --select-background-color: var(--mail-control) !important;
+    --border-radius-medium: 8px !important;
+  }
+
+  button:not(.plain, .plain-button, .icon-button, .button-flat, .close-icon, .tab-close-button, .scrollbutton-up, .scrollbutton-down, .titlebar-button, .message-bar-button-close, .search-button, .spinButton, .tree-view-header-button, [is="moz-button"], .tablet-only, .disclosure-button, .category, .tree-view-header-picker, .tree-table-cell-container, th button) {
+    min-block-size: 28px !important;
+    padding-block: 2px !important;
+    padding-inline: 14px !important;
+    appearance: none !important;
+    background-color: var(--mail-control) !important;
+    border: none !important;
+    border-radius: 15px !important;
+    color: var(--mail-text) !important;
+    outline: none;
+    &:hover:not([disabled], :disabled) {
+      background-color: var(--mail-control-hover) !important;
+    }
+    &:is(:hover:active, [open]):not([disabled], :disabled) {
+      background-color: var(--mail-control-active) !important;
+    }
+    &:is([disabled], :disabled) {
+      opacity: .45;
+    }
+    &:is([default], .primary, .button-primary, .disco-cta-button, .dialog-button-box:not(:has(button[default]:not([dlgtype="accept"]))) [dlgtype="accept"]):not([disabled], :disabled) {
+      background-color: var(--mail-accent) !important;
+      color: var(--mail-accent-text) !important;
+    }
+    &:focus-visible {
+      outline: 2px solid var(--mail-accent);
+      outline-offset: 1px;
+    }
+  }
+  select:not([size], [multiple]) {
+    min-block-size: 28px !important;
+    padding-block: 2px !important;
+    padding-inline: 12px 26px !important;
+    appearance: none !important;
+    background: var(--mail-control) url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%2386868b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='m3 4.75 3 3 3-3'/></svg>") no-repeat right 8px center / 12px !important;
+    border: none !important;
+    border-radius: 15px !important;
+    color: var(--mail-text) !important;
+  }
+  :is(input:not([type="checkbox"], [type="radio"], [type="color"], [type="range"], [type="file"], [type="button"], [type="submit"], [type="reset"], [type="image"], [type="hidden"]), textarea):not(menulist input, tree input) {
+    min-block-size: 24px;
+    appearance: none !important;
+    background-color: var(--mail-field) !important;
+    border: 1px solid var(--mail-field-line) !important;
+    border-radius: 8px !important;
+    color: var(--mail-text) !important;
+    &:focus {
+      border-color: transparent !important;
+      outline: 2px solid var(--mail-accent) !important;
+      outline-offset: -1px;
+    }
+    &:is([readonly], :disabled) {
+      background: transparent !important;
+    }
+  }
+
+  /* the toolbar of an event or task: capsules, Save and Close in the accent colour */
+  :is(#event-toolbar, #summary-toolbar) toolbarbutton {
+    min-block-size: 28px;
+    margin-inline: 3px !important;
+    padding: 2px 12px !important;
+    appearance: none !important;
+    background-color: var(--mail-control) !important;
+    border: none !important;
+    border-radius: 15px !important;
+    color: var(--mail-text) !important;
+    &:hover:not([disabled]) {
+      background-color: var(--mail-control-hover) !important;
+    }
+    &[disabled] {
+      opacity: .45;
+    }
+  }
+  #button-saveandclose:not([disabled]) {
+    background-color: var(--mail-accent) !important;
+    color: var(--mail-accent-text) !important;
+  }
+
+  /* a line icon in a reminder, Thunderbird's own (its page only loads chrome: pictures) */
+  .alarm-calendar-image {
+    content: url("chrome://messenger/skin/icons/new/normal/calendar.svg") !important;
+    -moz-context-properties: fill, stroke;
+    fill: color-mix(in srgb, currentColor 20%, transparent);
+    stroke: currentColor;
+    inline-size: 28px;
+    block-size: 28px;
+  }
+  /* column headings quiet, tables in the page without the accent colour */
+  treecols {
+    appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-block-end: 1px solid var(--mail-line) !important;
+  }
+  :is(treecol, treecolpicker) {
+    padding-block: 3px !important;
+    appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--mail-text-2) !important;
+  }
+  treechildren {
+    background-color: var(--mail-field) !important;
+  }
+  table:not(.tree-table) th {
+    background-color: var(--mail-control) !important;
+    color: var(--mail-text) !important;
+    font-weight: 500;
+  }
+  table:not(.tree-table) :is(th, td) {
+    border-color: var(--mail-line) !important;
+  }
+  /* the selected row of a sidebar in a page (accounts, contacts) */
+  :is(ul, ol)[is$="listbox"] li.selected > div {
+    background-color: var(--mail-selected) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: var(--mail-text) !important;
+    outline: none !important;
+  }
+  #palette-box {
+    background: var(--mail-field) !important;
+    border-radius: 10px !important;
+  }
+  editor {
+    border: 1px solid var(--mail-field-line) !important;
+    border-radius: 8px !important;
+  }
+
+  /* lists and groups as cards */
+  :is(richlistbox, listbox, tree, base-tree-view, select[size], select[multiple]) {
+    appearance: none !important;
+    background-color: var(--mail-field) !important;
+    border: 1px solid var(--mail-field-line) !important;
+    border-radius: 10px !important;
+    color: var(--mail-text) !important;
+    overflow: clip;
+  }
+  richlistitem[selected] {
+    background-color: var(--mail-accent) !important;
+    color: var(--mail-accent-text) !important;
+    border-radius: 6px;
+  }
+  richlistbox:not(:focus) > richlistitem[selected] {
+    background: var(--mail-selected) !important;
+    color: var(--mail-text) !important;
+  }
+  :is(groupbox, fieldset) {
+    margin-block: 6px;
+    padding: 10px 12px !important;
+    appearance: none !important;
+    background: light-dark(rgba(0, 0, 0, .035), rgba(255, 255, 255, .05)) !important;
+    border: none !important;
+    border-radius: 12px !important;
+  }
+  fieldset > legend {
+    float: inline-start;
+    inline-size: 100%;
+    margin-block-end: 6px;
+    padding: 0 !important;
+    font-weight: 600;
+    & + * {
+      clear: both;
+    }
+  }
+  /* tabs as a segmented control */
+  tabs:not(#tabmail-tabs, #tabcontainer) {
+    align-self: center;
+    margin-block-end: 8px;
+    padding: 2px;
+    background-color: var(--mail-control) !important;
+    border: none !important;
+    border-radius: 9px;
+  }
+  tab:not(.tabmail-tab) {
+    margin: 0 !important;
+    padding: 3px 14px !important;
+    appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 7px !important;
+    color: var(--mail-text) !important;
+    &[visuallyselected], &[selected] {
+      background: var(--mail-card) !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .18);
+    }
+  }
+  tabpanels {
+    appearance: none !important;
+    background: transparent !important;
+    border: none !important;
+    color: inherit !important;
+  }
+}
+
+/* --- every dialog window: the same grey ground */
+@-moz-document regexp("^chrome:(?!//messenger/content/(?:messenger|messageWindow|about3Pane|aboutMessage|messengercompose/messengercompose)\\.xhtml).*") {
+  :root {
+    background: var(--mail-window) !important;
+    color: var(--mail-text) !important;
+  }
+  body {
+    background: transparent !important;
+  }
+}

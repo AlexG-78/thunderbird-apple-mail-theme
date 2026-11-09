@@ -10,6 +10,7 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 Gio._promisify(Shell.Screenshot.prototype, 'screenshot');
+Gio._promisify(Shell.Screenshot.prototype, 'screenshot_area');
 
 const OUT = GLib.getenv('MAIL_TEST_OUT');
 const wait = ms => new Promise(r => GLib.timeout_add(GLib.PRIORITY_DEFAULT, ms, () => {
@@ -50,6 +51,9 @@ export default class MailShot extends Extension {
         }
         await wait(Number(GLib.getenv('MAIL_TEST_WAIT') || 9000));
         await this._shot('');
+        const survey = GLib.getenv('MAIL_TEST_SURVEY');
+        if (survey)
+            return this._survey(survey);
         // MAIL_TEST_POINTER="x,y[,click|,rclick|,swipe:<dx>|,key:<keys>] ...": move the pointer there and click, swipe two
         // fingers sideways (20 steps of dx) or press keys (Clutter key names, "+" for a combination: Control_L+z);
         // one screenshot after each step, a swipe also one while the fingers are down
@@ -88,6 +92,28 @@ export default class MailShot extends Extension {
             await wait(1200);
             await this._shot(`-${n}`);
         }
+    }
+
+    // MAIL_TEST_SURVEY=<dir>: the survey add-on names a picture in <dir>/request; it shows the window in front
+    async _survey(dir) {
+        const request = Gio.File.new_for_path(`${dir}/request`);
+        while (!GLib.file_test(`${dir}/done`, GLib.FileTest.EXISTS)) {
+            if (request.query_exists(null)) {
+                const [, bytes] = request.load_contents(null);
+                await this._window(`${dir}/${new TextDecoder().decode(bytes).trim()}.png`);
+                request.delete(null);
+            }
+            await wait(40);
+        }
+    }
+
+    async _window(path) {
+        const top = global.get_window_actors().map(a => a.meta_window).filter(w => w.get_frame_rect().width > 40).at(-1);
+        const r = top.get_frame_rect(), m = 24;
+        const x = Math.max(0, r.x - m), y = Math.max(0, r.y - m);
+        const stream = Gio.File.new_for_path(path).replace(null, false, Gio.FileCreateFlags.NONE, null);
+        await new Shell.Screenshot().screenshot_area(x, y, Math.min(r.width + 2 * m, global.stage.width - x), Math.min(r.height + 2 * m, global.stage.height - y), stream);
+        stream.close(null);
     }
 
     async _shot(suffix) {

@@ -3,7 +3,7 @@
 #   bash tools/mail/install.sh            show the planned changes, ask, then apply them to the default profile
 #   bash tools/mail/install.sh remove     take the look out and put the settings from before back
 #   bash tools/mail/install.sh status     exit 0 if applied (or switched off); 4 = no Thunderbird profile
-# In the profile: a marked block in chrome/userChrome.css (userChrome.css here), the settings of prefs.js here written
+# In the profile: a marked block in chrome/userChrome.css (userChrome.css and controls.css here), the settings of prefs.js here written
 # into the profile's prefs.js, and the layout of xulstore.json here (toolbar, sidebar, message header). The values
 # before are saved once in ~/.config/mbp115/mail.backup.json; a setting the user changes later is left alone. The
 # kit's add-on Mail Quick Actions (addon/ here: buttons on the message under the pointer, two-finger swipes) goes
@@ -22,6 +22,7 @@ prof=${MBP115_MAIL_PROFILE:-$(python3 -I "$here/profile.py" find)} || prof=
 css=$prof/chrome/userChrome.css       # the windows
 ucss=$prof/chrome/userContent.css    # the address book (a content page)
 off() { grep -qx "mail off" "$CONF/ui-choices" 2>/dev/null; }
+kit_css() { cat "$here/$1" "$here/controls.css"; }   # the windows' or the pages' own rules, then the controls of all
 block() { sed -n '\|^/\* mbp115-mail begin|,\|^/\* mbp115-mail end|p' "${1:-$css}" 2>/dev/null | sed '1d;$d'; }
 # Dock and app grid: Thunderbird with MacTahoe's Mail-style icon (internet-mail). The snap's desktop file names a fixed
 # picture, so no icon theme reaches it; a copy in ~/.local/share/applications (marked X-Mbp115=mail) replaces it.
@@ -113,20 +114,20 @@ tmp_set() {   # tmp_set add|del
     return 0
 }
 applied() {
-    [ "$(block)" = "$(cat "$here/userChrome.css")" ] && [ "$(block "$ucss")" = "$(cat "$here/userContent.css")" ] && python3 -I "$here/profile.py" status "$prof" "$BACKUP" \
+    [ "$(block)" = "$(kit_css userChrome.css)" ] && [ "$(block "$ucss")" = "$(kit_css userContent.css)" ] && python3 -I "$here/profile.py" status "$prof" "$BACKUP" \
         && python3 -I "$here/profile.py" addon same "$prof" && icon_ok && gtk_ok && tmp_ok
 }
 running() {   # Thunderbird writes prefs.js and xulstore.json when it quits: change them only while it is closed
     [ -z "${MBP115_MAIL_PROFILE:-}" ] && pgrep -u "$(id -u)" -x 'thunderbird|thunderbird-bin' >/dev/null
 }
 css_block() {   # css_block add|del [profile file] [kit file]
-    local f=${2:-$css} src=${3:-$here/userChrome.css}
+    local f=${2:-$css} src=${3:-userChrome.css}
     # only with both markers: without its end, sed would delete to the end of the file
     [ -f "$f" ] && grep -q '^/\* mbp115-mail end' "$f" && sed -i '\|^/\* mbp115-mail begin|,\|^/\* mbp115-mail end|d' "$f"
     if [ "$1" = add ]; then
         mkdir -p "${f%/*}"
         [ -s "$f" ] && [ -n "$(tail -c1 "$f")" ] && echo >> "$f"   # the marker must start a line
-        printf '/* mbp115-mail begin */\n%s\n/* mbp115-mail end */\n' "$(cat "$src")" >> "$f"
+        printf '/* mbp115-mail begin */\n%s\n/* mbp115-mail end */\n' "$(kit_css "$src")" >> "$f"
     elif [ -f "$f" ] && [ -z "$(tr -d '[:space:]' < "$f")" ]; then rm -f "$f"; fi
 }
 
@@ -152,6 +153,7 @@ case ${1:-install} in
     echo "   A message in its own window: Mail's actions in capsules (Reply, Reply All, Forward | Archive, Delete, Junk |"
     echo "        Move | Flag), the menu bar behind Alt"
     [ -n "$(gtk_themes)" ] && echo "   Its title bar (and the compose window's) with MacTahoe's coloured buttons: the theme is copied for the snap"
+    echo "   Every dialog, popup and settings page in one look: capsule buttons, rounded fields, lists and groups as cards"
     tmp_ok || echo "   Temporary files move from Downloads into the snap's own folder; the folder Downloads/thunderbird.tmp is deleted"
     echo "   Compose and reply window like Mail's: Send and the actions in capsules, plain To/Subject/From rows,"
     echo "        the formatting bar behind Aa, attachments as tiles, no progress window while sending, the menu bar behind Alt"
@@ -175,7 +177,7 @@ case ${1:-install} in
     done
     python3 -I "$here/profile.py" apply "$prof" "$BACKUP" || { echo "The settings could not be written."; exit 1; }
     css_block add
-    css_block add "$ucss" "$here/userContent.css"
+    css_block add "$ucss" userContent.css
     python3 -I "$here/profile.py" addon install "$prof" || { echo "The add-on could not be copied."; exit 1; }
     icon_set add
     gtk_set add

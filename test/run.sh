@@ -4,6 +4,7 @@
 #   run.sh [userChrome.css]   default: the kit's ../userChrome.css; "none" shows Thunderbird as it comes
 #   MAIL_TEST_XPI="a.xpi b.xpi"   add-ons to install too (files named <add-on id>.xpi)
 #   MAIL_TEST_SMTP=1   a mail server on 127.0.0.1:2525 that takes each message after 3 s
+#   MAIL_TEST_SURVEY=1   survey.sh: pictures and measurements of every window in out/survey/<style>/
 #   MAIL_TEST_POINTER="x,y x,y,click x,y,key:Control_L+z"   move the pointer (and click or press keys) after the
 #     first shot: <style>-1.png, -2.png, ...
 # Uses the snap's Thunderbird binary without the snap (the snap cannot reach the temporary dirs). Changes nothing
@@ -24,8 +25,8 @@ profile() {   # profile <dir> <dark 0|1>
     python3 -I "$here/gen-calendar.py" "$p/cal.ics"
     (cd "$here/select" && zip -qr "$p/extensions/mbp115-mail-test@alexg-78.xpi" .)
     local x; for x in ${MAIL_TEST_XPI:-}; do cp "$x" "$p/extensions/"; done   # add-ons to try, named <id>.xpi
-    [ "$css" = none ] || cp "$css" "$p/chrome/userChrome.css"
-    [ "$css" = none ] || cp "$here/../userContent.css" "$p/chrome/userContent.css"
+    [ "$css" = none ] || cat "$css" "$here/../controls.css" > "$p/chrome/userChrome.css"
+    [ "$css" = none ] || cat "$here/../userContent.css" "$here/../controls.css" > "$p/chrome/userContent.css"
     cat > "$p/user.js" <<EOF
 user_pref("mail.accountmanager.accounts", "account1,account2");
 user_pref("mail.accountmanager.defaultaccount", "account1");
@@ -75,6 +76,11 @@ user_pref("calendar.registry.kittest.readOnly", true);
 user_pref("calendar.registry.kittest.calendar-main-in-composite", true);
 user_pref("calendar.timezone.useSystemTimezone", true);
 EOF
+    [ -n "${MAIL_TEST_SURVEY:-}" ] && cat >> "$p/user.js" <<EOF2
+user_pref("calendar.registry.kitstore.type", "storage");
+user_pref("calendar.registry.kitstore.uri", "moz-storage-calendar://");
+user_pref("calendar.registry.kitstore.name", "Home");
+EOF2
     [ "$css" = none ] && return 0
     cat "$here/../prefs.js" >> "$p/user.js"            # the kit's layout settings
     cp "$here/../xulstore.json" "$p/xulstore.json"     # toolbar, sidebar and message header layout
@@ -109,7 +115,9 @@ for style in ${MAIL_TEST_STYLES:-light dark}; do
         look+="gsettings set org.gnome.desktop.interface $key \"$(gsettings get org.gnome.desktop.interface $key)\"; "
     done
     look+="gsettings set org.gnome.desktop.wm.preferences button-layout \"$(gsettings get org.gnome.desktop.wm.preferences button-layout)\"; "
-    XDG_DATA_HOME=$d/d XDG_CONFIG_HOME=$d/c XDG_CACHE_HOME=$d/k XDG_RUNTIME_DIR=$d/r MAIL_TEST_OUT=$out/$style \
+    survey=
+    if [ -n "${MAIL_TEST_SURVEY:-}" ]; then survey=$out/survey/$style; rm -rf "$survey"; mkdir -p "$survey"; cp "$MAIL_TEST_SURVEY" "$survey/windows.json"; fi
+    XDG_DATA_HOME=$d/d XDG_CONFIG_HOME=$d/c XDG_CACHE_HOME=$d/k XDG_RUNTIME_DIR=$d/r MAIL_TEST_OUT=$out/$style MAIL_TEST_SURVEY=$survey MAIL_TEST_ONLY=${MAIL_TEST_ONLY:-} \
     MAIL_TEST_TB="MOZ_CRASHREPORTER_DISABLE=1 '$tb' -profile '$d/p' -no-remote >'$out/$style-tb.log' 2>&1" \
     dbus-run-session -- bash -c "
         gsettings set org.gnome.shell enabled-extensions \"[$exts]\"
@@ -119,7 +127,7 @@ for style in ${MAIL_TEST_STYLES:-light dark}; do
         gsettings set org.gnome.desktop.interface color-scheme '$scheme'
         $look
         dconf write /org/gnome/shell/extensions/user-theme/name \"'MacTahoe-Dark'\"
-        $(command -v gnutimeout || echo timeout) 90 gnome-shell --headless --wayland --no-x11 --virtual-monitor 1920x1200
+        $(command -v gnutimeout || echo timeout) ${MAIL_TEST_TIME:-90} gnome-shell --headless --wayland --no-x11 --virtual-monitor 1920x1200
     " >"$out/$style-shell.log" 2>&1 || true
     grep -h 'MAIL-TEST' "$out/$style-shell.log" "$out/$style-tb.log" 2>/dev/null || true
     [ -s "$out/$style.png" ] || { echo "$style: no screenshot, logs in $out"; rc=1; }
