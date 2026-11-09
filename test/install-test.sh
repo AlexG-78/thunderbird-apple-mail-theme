@@ -16,6 +16,10 @@ printf '/* my own rule */\n#folderPane { color: red; }' > "$P/chrome/userChrome.
 mkdir -p "$HOME/.themes/MacTahoe-Light/gtk-3.0/assets" "$HOME/snap/thunderbird/common"   # MacTahoe's GTK theme for the snap
 echo '/* theme */' > "$HOME/.themes/MacTahoe-Light/gtk-3.0/gtk.css"; touch "$HOME/.themes/MacTahoe-Light/index.theme"
 mkdir -p "$HOME/.themes/MacTahoe-Dark/gtk-3.0"; echo '/* dark only */' > "$HOME/.themes/MacTahoe-Dark/gtk-3.0/gtk.css"; touch "$HOME/.themes/MacTahoe-Dark/index.theme"
+mkdir -p "$HOME/snap/thunderbird/1/.config" "$HOME/Downloads/thunderbird.tmp"; ln -s 1 "$HOME/snap/thunderbird/current"   # the snap's temporary folder
+printf 'XDG_DESKTOP_DIR="$HOME/Desktop"\nXDG_DOWNLOAD_DIR="$HOME/Downloads"\n' > "$XDG_CONFIG_HOME/user-dirs.dirs"
+snapdirs=$HOME/snap/thunderbird/current/.config/user-dirs.dirs; sed "s#\$HOME#$HOME#g" "$XDG_CONFIG_HOME/user-dirs.dirs" > "$snapdirs"
+touch "$HOME/Downloads/thunderbird.tmp/temp" "$HOME/Downloads/keep"
 
 n=0 fail=0
 check() { n=$((n + 1)); if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=$((fail + 1)); fi; }
@@ -45,6 +49,7 @@ check "install: backup saved" '[ -s "$XDG_CONFIG_HOME/mbp115/mail.backup.json" ]
 check "install: GTK theme copied for the snap" '[ -s "$HOME/snap/thunderbird/common/.themes/MacTahoe-Light/gtk-3.0/gtk.css" ] && [ -e "$HOME/snap/thunderbird/common/.themes/MacTahoe-Light/.mbp115-mail" ]'
 check "install: the snap's MacTahoe-Dark has the light variant too" 'cmp -s "$HOME/snap/thunderbird/common/.themes/MacTahoe-Dark/gtk-3.0/gtk.css" "$HOME/.themes/MacTahoe-Light/gtk-3.0/gtk.css"'
 check "install: sender names formatted again" '[ "$(pref mail.displayname.version)" = 1 ]'
+check "install: the temporary folder leaves Downloads, nothing else there" 'grep -qx "XDG_DOWNLOAD_DIR=\"$HOME/snap/thunderbird/common\"" "$snapdirs" && [ ! -w "$snapdirs" ] && grep -q Desktop "$snapdirs" && [ ! -e "$HOME/Downloads/thunderbird.tmp" ] && [ -e "$HOME/Downloads/keep" ]'
 
 # the user changes two settings in Thunderbird afterwards
 sed -i 's/"toolbar.unifiedtoolbar.buttonstyle", 2/"toolbar.unifiedtoolbar.buttonstyle", 0/' "$P/prefs.js"
@@ -70,6 +75,7 @@ check "remove: sender names formatted again" '[ "$(pref mail.displayname.version
 check "remove: add-on gone" '[ ! -e "$P/extensions/mbp115-quick-actions@alexg-78.xpi" ]'
 check "remove: GTK theme copy gone" '[ ! -e "$HOME/snap/thunderbird/common/.themes" ]'
 check "remove: backup gone" '[ ! -e "$XDG_CONFIG_HOME/mbp115/mail.backup.json" ]'
+check "remove: the snap's Downloads is the real one, writable" 'grep -qx "XDG_DOWNLOAD_DIR=\"$HOME/Downloads\"" "$snapdirs" && [ -w "$snapdirs" ]'
 
 rm "$P/chrome/userChrome.css"; echo y | run >/dev/null; run remove >/dev/null
 check "remove without own CSS: no empty userChrome.css left" '[ ! -e "$P/chrome/userChrome.css" ]'

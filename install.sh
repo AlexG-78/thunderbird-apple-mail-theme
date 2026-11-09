@@ -92,9 +92,29 @@ gtk_set() {   # gtk_set add|del
     fi
     return 0
 }
+# The snap's launcher makes <its Downloads>/thunderbird.tmp the temporary folder (opened attachments, crash reports) and
+# takes that from its own copy of user-dirs.dirs. Its Downloads now names the snap's own folder; Thunderbird itself
+# does not use it (browser.download.useDownloadDir is false: it asks where to save). Read-only: after every snap update
+# the launcher tries to copy the real file over it; that failure is harmless, a copy would bring the folder back.
+SNAPDIRS=$HOME/snap/thunderbird/current/.config/user-dirs.dirs
+SNAPDL="XDG_DOWNLOAD_DIR=\"$HOME/snap/thunderbird/common\""
+tmp_ok() { [ ! -f "$SNAPDIRS" ] || { [ ! -w "$SNAPDIRS" ] && grep -qxF "$SNAPDL" "$SNAPDIRS"; }; }
+tmp_set() {   # tmp_set add|del
+    [ -f "$SNAPDIRS" ] || return 0
+    local old
+    if [ "$1" = add ]; then
+        tmp_ok && return 0
+        { grep -v '^XDG_DOWNLOAD_DIR=' "$SNAPDIRS"; echo "$SNAPDL"; } > "$SNAPDIRS.new" && chmod a-w "$SNAPDIRS.new" && mv -f "$SNAPDIRS.new" "$SNAPDIRS"
+        old=$(xdg-user-dir DOWNLOAD 2>/dev/null) && [ -n "$old" ] && rm -rf "$old/thunderbird.tmp"
+    elif grep -qxF "$SNAPDL" "$SNAPDIRS"; then
+        # written back here: when the launcher does it, it also moves everything in the snap's folder to Downloads
+        sed "/^#/!s#\$HOME#$HOME#g" "$HOME/.config/user-dirs.dirs" > "$SNAPDIRS.new" && mv -f "$SNAPDIRS.new" "$SNAPDIRS"
+    fi
+    return 0
+}
 applied() {
     [ "$(block)" = "$(cat "$here/userChrome.css")" ] && [ "$(block "$ucss")" = "$(cat "$here/userContent.css")" ] && python3 -I "$here/profile.py" status "$prof" "$BACKUP" \
-        && python3 -I "$here/profile.py" addon same "$prof" && icon_ok && gtk_ok
+        && python3 -I "$here/profile.py" addon same "$prof" && icon_ok && gtk_ok && tmp_ok
 }
 running() {   # Thunderbird writes prefs.js and xulstore.json when it quits: change them only while it is closed
     [ -z "${MBP115_MAIL_PROFILE:-}" ] && pgrep -u "$(id -u)" -x 'thunderbird|thunderbird-bin' >/dev/null
@@ -132,6 +152,7 @@ case ${1:-install} in
     echo "   A message in its own window: Mail's actions in capsules (Reply, Reply All, Forward | Archive, Delete, Junk |"
     echo "        Move | Flag), the menu bar behind Alt"
     [ -n "$(gtk_themes)" ] && echo "   Its title bar (and the compose window's) with MacTahoe's coloured buttons: the theme is copied for the snap"
+    tmp_ok || echo "   Temporary files move from Downloads into the snap's own folder; the folder Downloads/thunderbird.tmp is deleted"
     echo "   Compose and reply window like Mail's: Send and the actions in capsules, plain To/Subject/From rows,"
     echo "        the formatting bar behind Aa, attachments as tiles, no progress window while sending, the menu bar behind Alt"
     echo "   Kit add-on Mail Quick Actions: read/unread, flag, archive and delete on the message under the pointer;"
@@ -158,6 +179,7 @@ case ${1:-install} in
     python3 -I "$here/profile.py" addon install "$prof" || { echo "The add-on could not be copied."; exit 1; }
     icon_set add
     gtk_set add
+    tmp_set add
     applied || { echo "Some changes could not be made."; exit 1; }
     echo "Done - start Thunderbird to see it. Turn on the quick actions once: ≡ menu > Add-ons and Themes >"
     echo "   Extensions > Mail Quick Actions (Thunderbird keeps add-ons copied into the profile off until you do)."
@@ -173,6 +195,7 @@ case ${1:-install} in
     python3 -I "$here/profile.py" addon remove "$prof"
     icon_set del
     gtk_set del
+    tmp_set del
     if [ -f "$BACKUP" ]; then python3 -I "$here/profile.py" revert "$prof" "$BACKUP" || { echo "Thunderbird's settings could not be restored."; exit 1; }; fi
     echo "Thunderbird looks and works as before (settings you changed since are kept)."
     ;;
