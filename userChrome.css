@@ -1107,4 +1107,9 @@ calendar-day-label[relation="today"] {
   .titlebar-close {
     order: -1;
   }
+  /* smaller toolbar icons: beside Windows' smaller text the 28 px ones look too big */
+  #unifiedToolbarContent .button-icon {
+    inline-size: 20px !important;
+    block-size: 20px !important;
+  }
 }
