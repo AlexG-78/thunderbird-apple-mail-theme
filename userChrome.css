@@ -109,6 +109,8 @@ unified-toolbar {
 #unifiedToolbarContent li[item-id="search-bar"] {
   flex: 0 1 260px !important;
   max-inline-size: 260px !important;
+  /* room for "Search…": the field does not give way to the buttons' shift, the add-on shortens the shift instead */
+  min-inline-size: min(200px, 20vw) !important;
   margin-inline-start: 10px !important;
   --button-border-radius: 19px;
   --search-padding: 8px;
