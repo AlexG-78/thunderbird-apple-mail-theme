@@ -1088,3 +1088,23 @@ calendar-day-label[relation="today"] {
 .titlebar-button:-moz-window-inactive > .toolbarbutton-icon {
   background-color: light-dark(#dcdcdc, #4b4b4d) !important;
 }
+/* Windows: Thunderbird draws its window buttons there as font glyphs (::before, the icon hidden) at the right. The
+ * circles instead, at the left with Close first as on a Mac (on Linux the desktop's button layout decides that) */
+@media (-moz-platform: windows) {
+  #unifiedToolbarContainer {
+    flex-direction: row-reverse !important;
+  }
+  .titlebar-button {
+    padding: 0 5px !important;
+    background-color: transparent !important;
+    &::before {
+      display: none !important;
+    }
+    & > .toolbarbutton-icon {
+      display: block !important;
+    }
+  }
+  .titlebar-close {
+    order: -1;
+  }
+}
